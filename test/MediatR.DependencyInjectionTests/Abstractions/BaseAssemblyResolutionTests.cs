@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using MediatR.DependencyInjectionTests.Contracts.Notifications;
+using MediatR.DependencyInjectionTests.Contracts.StreamRequests;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.DependencyInjectionTests.Abstractions;
 
@@ -13,8 +15,6 @@ public abstract class BaseAssemblyResolutionTests : IClassFixture<BaseServicePro
     public void Should_Resolve_Mediator() =>
         _provider.GetService<IMediator>()
             .ShouldNotBeNull();
-
-    #region REQUESTS
 
     [Fact]
     public void Should_Resolve_Public_RequestHandler() =>
@@ -31,10 +31,6 @@ public abstract class BaseAssemblyResolutionTests : IClassFixture<BaseServicePro
         _provider.GetService<IRequestHandler<PrivatePing, Pong>>()
             .ShouldNotBeNull();
 
-    #endregion
-
-    #region VOID_REQUESTS
-
     [Fact]
     public void Should_Resolve_Public_Void_RequestHandler() =>
         _provider.GetService<IRequestHandler<PublicVoidPing>>()
@@ -50,5 +46,24 @@ public abstract class BaseAssemblyResolutionTests : IClassFixture<BaseServicePro
         _provider.GetService<IRequestHandler<PrivateVoidPing>>()
             .ShouldNotBeNull();
 
-    #endregion
+    [Fact]
+    public void Should_Resolve_Public_Private_Internal_Notification_Handlers() =>
+        _provider.GetServices<INotificationHandler<Ding>>()
+            .Count()
+            .ShouldBe(3);
+
+    [Fact]
+    public void Should_Resolve_Public_Stream_Request_Handlers() =>
+        _provider.GetService<IStreamRequestHandler<PublicZing, Zong>>()
+            .ShouldNotBeNull();
+
+    [Fact]
+    public void Should_Resolve_Internal_Stream_Request_Handlers() =>
+        _provider.GetService<IStreamRequestHandler<InternalZing, Zong>>()
+            .ShouldNotBeNull();
+
+    [Fact]
+    public void Should_Resolve_Private_Stream_Request_Handlers() =>
+        _provider.GetService<IStreamRequestHandler<PrivateZing, Zong>>()
+            .ShouldNotBeNull();
 }
