@@ -1,12 +1,7 @@
-namespace MediatR.Tests.Pipeline;
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using MediatR.Pipeline;
-using Shouldly;
 using Lamar;
-using Xunit;
+
+namespace MediatR.Tests.Pipeline;
 
 public class RequestExceptionActionTests
 {
@@ -99,7 +94,8 @@ public class RequestExceptionActionTests
         var pingExceptionAction = new PingExceptionAction();
         var pongExceptionAction = new PongExceptionAction();
         var pingPongExceptionAction = new PingPongExceptionAction<Ping>();
-        var container = new Container(cfg =>
+        
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionAction<Ping, PingException>>().Use(_ => pingExceptionAction);
@@ -123,7 +119,7 @@ public class RequestExceptionActionTests
     public async Task Should_run_matching_exception_actions_only_once()
     {
         var genericExceptionAction = new GenericExceptionAction<Ping>();
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionAction<Ping, Exception>>().Use(_ => genericExceptionAction);

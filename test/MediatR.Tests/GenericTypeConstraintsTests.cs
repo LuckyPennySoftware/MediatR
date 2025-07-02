@@ -89,7 +89,7 @@ public class GenericTypeConstraintsTests
 
     public GenericTypeConstraintsTests()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {

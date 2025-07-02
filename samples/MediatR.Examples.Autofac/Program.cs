@@ -45,7 +45,7 @@ internal static class Program
                 // this call will cause a handler to be called twice
                 // in general you should try to avoid having a class implementing for instance `IRequestHandler<,>` and `INotificationHandler<>`
                 // the other option would be to remove this call
-                // see also https://github.com/jbogard/MediatR/issues/462
+                // see also https://github.com/LuckyPennySoftware/MediatR/issues/462
                 .AsImplementedInterfaces();
         }
 

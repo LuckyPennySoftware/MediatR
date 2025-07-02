@@ -87,7 +87,7 @@ public class RequestExceptionHandlerTests
     [Fact]
     public async Task Should_run_exception_handler_and_allow_for_exception_not_to_throw()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongExceptionHandler>();
@@ -106,7 +106,7 @@ public class RequestExceptionHandlerTests
     [Fact]
     public async Task Should_run_exception_handler_and_allow_for_exception_to_be_still_thrown()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongExceptionHandlerNotHandled>();
@@ -128,7 +128,7 @@ public class RequestExceptionHandlerTests
     [Fact]
     public async Task Should_run_exception_handler_and_unwrap_expections_thrown_in_the_handler()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongThrowingExceptionHandler>();
@@ -149,7 +149,7 @@ public class RequestExceptionHandlerTests
     public async Task Should_run_matching_exception_handlers_only_once()
     {
         var genericPingExceptionHandler = new GenericPingExceptionHandler();
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use(genericPingExceptionHandler);

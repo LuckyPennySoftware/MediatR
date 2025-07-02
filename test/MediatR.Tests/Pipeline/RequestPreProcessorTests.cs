@@ -41,7 +41,7 @@ public class RequestPreProcessorTests
     [Fact]
     public async Task Should_run_preprocessors()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {

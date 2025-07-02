@@ -71,7 +71,7 @@ public class ExceptionTests
 
     public ExceptionTests()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IMediator>().Use<Mediator>();
         });
@@ -135,7 +135,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_argument_exception_for_send_when_request_is_null()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -156,7 +156,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_argument_exception_for_void_send_when_request_is_null()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -177,7 +177,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_argument_exception_for_publish_when_request_is_null()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -198,7 +198,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_argument_exception_for_publish_when_request_is_null_object()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -219,7 +219,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_argument_exception_for_publish_when_request_is_not_notification()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -253,7 +253,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_exception_for_non_generic_send_when_exception_occurs()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -275,7 +275,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_exception_for_non_request_send()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -302,7 +302,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_exception_for_generic_send_when_exception_occurs()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {

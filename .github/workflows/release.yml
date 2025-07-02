@@ -8,35 +8,33 @@ jobs:
   build:
     strategy:
       matrix: 
-        os: [ubuntu-latest]
+        os: [windows-latest]
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Setup dotnet 6.0
+    - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '6.0.x'
-    - name: Setup dotnet 8.0
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.100'
+        dotnet-version: |
+          8.0.x
+          9.0.x
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh
-#    - name: Push to MyGet
-#      env:
-#        NUGET_URL: https://www.myget.org/F/mediatr-ci/api/v3/index.json
-#        NUGET_API_KEY: ${{ secrets.MYGET_MEDIATR_CI_API_KEY }}
-#      run: ./Push.ps1
-#      shell: pwsh
+    - name: Push to MyGet
+      env:
+        NUGET_URL: https://www.myget.org/F/luckypennysoftware/api/v3/index.json
+        NUGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
+      run: ./Push.ps1
+      shell: pwsh
 #    - name: Push to NuGet
 #      env:
 #        NUGET_URL: https://api.nuget.org/v3/index.json
-#        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+#        NUGET_API_KEY: ${{ secrets.MEDIATR_NUGET_API_KEY }}
 #      run: ./Push.ps1
 #      shell: pwsh
     - name: Artifacts

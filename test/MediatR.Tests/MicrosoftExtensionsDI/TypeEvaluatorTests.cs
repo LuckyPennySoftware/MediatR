@@ -18,6 +18,7 @@ public class TypeEvaluatorTests
     public TypeEvaluatorTests()
     {
         _services = new ServiceCollection();
+        _services.AddFakeLogging();
         _services.AddSingleton(new Logger());
         _services.AddMediatR(cfg =>
         {

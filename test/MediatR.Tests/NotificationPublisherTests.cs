@@ -34,6 +34,7 @@ public class NotificationPublisherTests
     public async Task Should_handle_sequentially_by_default()
     {
         var services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining<Notification>();

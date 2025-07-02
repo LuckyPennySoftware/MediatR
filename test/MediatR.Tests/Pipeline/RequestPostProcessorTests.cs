@@ -41,7 +41,7 @@ public class RequestPostProcessorTests
     [Fact]
     public async Task Should_run_postprocessors()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {

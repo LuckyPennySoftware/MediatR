@@ -19,6 +19,7 @@ public class SendTests
     {
         _dependency = new Dependency();
         var services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly);

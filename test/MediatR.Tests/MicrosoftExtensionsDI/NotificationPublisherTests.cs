@@ -30,6 +30,7 @@ public class NotificationPublisherTests
     public void ShouldResolveDefaultPublisher()
     {
         var services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddSingleton(new Logger());
         services.AddMediatR(cfg =>
         {
@@ -51,7 +52,7 @@ public class NotificationPublisherTests
     {
         var publisher = new MockPublisher();
         var services = new ServiceCollection();
-        services.AddSingleton(new Logger());
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining(typeof(CustomMediatorTests));
@@ -72,7 +73,7 @@ public class NotificationPublisherTests
     public async Task ShouldSubstitutePublisherServiceType()
     {
         var services = new ServiceCollection();
-        services.AddSingleton(new Logger());
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining(typeof(CustomMediatorTests));
@@ -98,7 +99,7 @@ public class NotificationPublisherTests
     public async Task ShouldSubstitutePublisherServiceTypeWithWhenAll()
     {
         var services = new ServiceCollection();
-        services.AddSingleton(new Logger());
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining(typeof(CustomMediatorTests));

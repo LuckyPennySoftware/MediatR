@@ -1,8 +1,11 @@
 using System;
 using System.Linq;
 using MediatR;
+using MediatR.Licensing;
 using MediatR.Pipeline;
 using MediatR.Registration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -55,4 +58,19 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+    
+    internal static void CheckLicense(this IServiceProvider serviceProvider)
+    {
+        if (LicenseChecked == false)
+        {
+            var licenseAccessor = serviceProvider.GetRequiredService<LicenseAccessor>();
+            var licenseValidator = serviceProvider.GetRequiredService<LicenseValidator>();
+            var license = licenseAccessor.Current;
+            licenseValidator.Validate(license);
+        }
+
+        LicenseChecked = true;
+    }
+
+    internal static bool LicenseChecked { get; set; }
 }

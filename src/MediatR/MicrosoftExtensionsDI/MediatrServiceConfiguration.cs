@@ -96,6 +96,11 @@ public class MediatRServiceConfiguration
     public bool RegisterGenericHandlers { get; set; } = false;
 
     /// <summary>
+    /// Gets or sets the license key. You can find your license key in your <a href="https://luckypennysoftware.com/account">account</a>.
+    /// </summary>
+    public string? LicenseKey { get; set; }
+
+    /// <summary>
     /// Register various handlers from assembly containing given type
     /// </summary>
     /// <typeparam name="T">Type from assembly to scan</typeparam>

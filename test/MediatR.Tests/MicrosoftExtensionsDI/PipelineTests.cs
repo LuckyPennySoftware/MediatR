@@ -1,14 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
-using Xunit.Abstractions;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Pipeline;
@@ -520,6 +516,7 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
+        services.AddFakeLogging();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
@@ -946,6 +943,7 @@ public class PipelineTests
             cfg.AddBehavior<ClosedBehavior>();
             cfg.AddOpenBehavior(typeof(Open2Behavior<,>));
         });
+        services.AddFakeLogging();
         var logger = new Logger();
         services.AddSingleton(logger);
         services.AddSingleton(new MediatR.Tests.PipelineTests.Logger());
@@ -1037,6 +1035,7 @@ public class PipelineTests
             cfg.RegisterServicesFromAssemblyContaining<FooRequest>();
             cfg.AddOpenBehaviors(behaviorTypeList);
         });
+        services.AddFakeLogging();
         var logger = new Logger();
         services.AddSingleton(logger);
         services.AddSingleton(new MediatR.Tests.PipelineTests.Logger());

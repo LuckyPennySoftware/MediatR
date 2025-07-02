@@ -91,6 +91,7 @@ public class StreamPipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);

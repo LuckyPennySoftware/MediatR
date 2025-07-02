@@ -1,4 +1,5 @@
 using MediatR.NotificationPublishers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR;
 
@@ -37,6 +38,8 @@ public class Mediator : IMediator
     {
         _serviceProvider = serviceProvider;
         _publisher = publisher;
+        
+        _serviceProvider.CheckLicense();
     }
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)

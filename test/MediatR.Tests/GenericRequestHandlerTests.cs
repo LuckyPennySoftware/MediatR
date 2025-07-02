@@ -1,16 +1,4 @@
-﻿using MediatR.Extensions.Microsoft.DependencyInjection.Tests;
-using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using System.Reflection.PortableExecutable;
+﻿using System.Linq;
 using MediatR.Tests.MicrosoftExtensionsDI;
 
 namespace MediatR.Tests
@@ -98,7 +86,7 @@ namespace MediatR.Tests
         public void ShouldThrowExceptionWhenTypesClosingExceedsMaximum()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
+            services.AddFakeLogging();
 
             var assembly = GenerateTypesClosingExceedsMaximumAssembly();
 
@@ -117,7 +105,7 @@ namespace MediatR.Tests
         public void ShouldThrowExceptionWhenGenericHandlerRegistrationsExceedsMaximum()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
+            services.AddFakeLogging();
 
             var assembly = GenerateHandlerRegistrationsExceedsMaximumAssembly();
 
@@ -136,7 +124,7 @@ namespace MediatR.Tests
         public void ShouldThrowExceptionWhenGenericTypeParametersExceedsMaximum()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
+            services.AddFakeLogging();
 
             var assembly = GenerateGenericTypeParametersExceedsMaximumAssembly();
 
@@ -155,7 +143,7 @@ namespace MediatR.Tests
         public void ShouldThrowExceptionWhenTimeoutOccurs()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
+            services.AddFakeLogging();
 
             var assembly = GenerateTimeoutOccursAssembly();
 
@@ -166,7 +154,7 @@ namespace MediatR.Tests
                     cfg.MaxGenericTypeParameters = 0;
                     cfg.MaxGenericTypeRegistrations = 0;
                     cfg.MaxTypesClosing = 0;
-                    cfg.RegistrationTimeout = 1000;
+                    cfg.RegistrationTimeout = 100;
                     cfg.RegisterGenericHandlers = true;
                     cfg.RegisterServicesFromAssembly(assembly);
                 });
@@ -178,7 +166,7 @@ namespace MediatR.Tests
         public void ShouldNotRegisterGenericHandlersWhenOptingOut()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
+            services.AddFakeLogging();
 
             var assembly = GenerateOptOutAssembly();
             services.AddMediatR(cfg =>

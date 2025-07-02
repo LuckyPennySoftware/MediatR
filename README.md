@@ -1,7 +1,7 @@
 MediatR
 =======
 
-![CI](https://github.com/jbogard/MediatR/workflows/CI/badge.svg)
+![CI](https://github.com/LuckyPennySoftware/MediatR/workflows/CI/badge.svg)
 [![NuGet](https://img.shields.io/nuget/dt/mediatr.svg)](https://www.nuget.org/packages/mediatr) 
 [![NuGet](https://img.shields.io/nuget/vpre/mediatr.svg)](https://www.nuget.org/packages/mediatr)
 [![MyGet (dev)](https://img.shields.io/myget/mediatr-ci/v/MediatR.svg)](https://myget.org/gallery/mediatr-ci)
@@ -12,7 +12,7 @@ In-process messaging with no dependencies.
 
 Supports request/response, commands, queries, notifications and events, synchronous and async with intelligent dispatching via C# generic variance.
 
-Examples in the [wiki](https://github.com/jbogard/MediatR/wiki).
+Examples in the [wiki](https://github.com/LuckyPennySoftware/MediatR/wiki).
 
 ### Installing MediatR
 
@@ -87,3 +87,16 @@ services.AddMediatR(cfg => {
 ```
 
 With additional methods for open generics and overloads for explicit service types.
+
+### Setting the license key
+
+You can set the license key when registering MediatR:
+
+```csharp
+services.AddMediatR(cfg => 
+{
+    cfg.LicenseKey = "<license key here>";
+})
+```
+
+You can register for your license key at [MediatR.io](https://mediatr.io)

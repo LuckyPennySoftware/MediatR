@@ -80,6 +80,7 @@ public class PipelineMultiCallToConstructorTests
         IServiceCollection services = new ServiceCollection();
 
         services.AddSingleton(output);
+        services.AddFakeLogging();
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ConstructorTestBehavior<,>));
         services.AddMediatR(cfg =>
         {

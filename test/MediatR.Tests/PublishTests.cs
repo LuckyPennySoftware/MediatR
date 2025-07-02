@@ -54,7 +54,7 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -82,7 +82,7 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -141,7 +141,7 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -170,7 +170,7 @@ public class PublishTests
         var writer = new StringWriter(builder);
         var publisher = new SequentialPublisher();
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -200,7 +200,7 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -230,7 +230,7 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {

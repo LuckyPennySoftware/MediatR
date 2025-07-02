@@ -195,7 +195,7 @@ public class StreamPipelineTests
     public async Task Should_wrap_with_behavior()
     {
         var output = new Logger();
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -231,7 +231,7 @@ public class StreamPipelineTests
     public async Task Should_wrap_generics_with_behavior()
     {
         var output = new Logger();
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -269,7 +269,7 @@ public class StreamPipelineTests
     public async Task Should_handle_constrained_generics()
     {
         var output = new Logger();
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -326,7 +326,7 @@ public class StreamPipelineTests
     public async Task Should_handle_concrete_and_open_generics()
     {
         var output = new Logger();
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {

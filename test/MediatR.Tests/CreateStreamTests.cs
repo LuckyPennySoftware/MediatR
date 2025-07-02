@@ -34,7 +34,7 @@ public class CreateStreamTests
     [Fact]
     public async Task Should_resolve_main_handler()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -66,7 +66,7 @@ public class CreateStreamTests
     [Fact]
     public async Task Should_resolve_main_handler_via_dynamic_dispatch()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -99,7 +99,7 @@ public class CreateStreamTests
     [Fact]
     public async Task Should_resolve_main_handler_by_specific_interface()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
@@ -130,7 +130,7 @@ public class CreateStreamTests
     [Fact]
     public void Should_raise_execption_on_null_request()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IMediator>().Use<Mediator>();
         });
@@ -143,7 +143,7 @@ public class CreateStreamTests
     [Fact]
     public void Should_raise_execption_on_null_request_via_dynamic_dispatch()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.For<IMediator>().Use<Mediator>();
         });
