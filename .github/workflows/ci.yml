@@ -26,8 +26,8 @@ jobs:
       shell: pwsh
     - name: Push to MyGet
       env:
-        NUGET_URL: https://www.myget.org/F/luckypennysoftware/api/v3/index.json
-        NUGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
+        NUGET_URL: https://f.feedz.io/lucky-penny-software/mediatr/nuget/index.json
+        NUGET_API_KEY: ${{ secrets.FEEDZIO_ACCESS_TOKEN }}
       run: ./Push.ps1
       shell: pwsh
     - name: Artifacts
