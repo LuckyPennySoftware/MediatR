@@ -31,12 +31,12 @@ jobs:
         NUGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
       run: ./Push.ps1
       shell: pwsh
-#    - name: Push to NuGet
-#      env:
-#        NUGET_URL: https://api.nuget.org/v3/index.json
-#        NUGET_API_KEY: ${{ secrets.MEDIATR_NUGET_API_KEY }}
-#      run: ./Push.ps1
-#      shell: pwsh
+    - name: Push to NuGet
+      env:
+        NUGET_URL: https://api.nuget.org/v3/index.json
+        NUGET_API_KEY: ${{ secrets.MEDIATR_NUGET_API_KEY }}
+      run: ./Push.ps1
+      shell: pwsh
     - name: Artifacts
       uses: actions/upload-artifact@v4
       with:
