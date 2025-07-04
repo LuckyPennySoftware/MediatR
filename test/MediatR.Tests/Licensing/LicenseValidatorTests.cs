@@ -114,7 +114,7 @@ public class LicenseValidatorTests
             .ShouldContain(log => log.Level == LogLevel.Error);
     }
     
-    [Fact]
+    [Fact(Skip = "Needs license")]
     public void Should_return_valid_for_actual_valid_license()
     {
         var factory = new LoggerFactory();
@@ -124,7 +124,7 @@ public class LicenseValidatorTests
         var config = new MediatRServiceConfiguration
         {
             LicenseKey =
-                "eyJhbGciOiJSUzI1NiIsImtpZCI6Ikx1Y2t5UGVubnlTb2Z0d2FyZUxpY2Vuc2VLZXkvYmJiMTNhY2I1OTkwNGQ4OWI0Y2IxYzg1ZjA4OGNjZjkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2x1Y2t5cGVubnlzb2Z0d2FyZS5jb20iLCJhdWQiOiJMdWNreVBlbm55U29mdHdhcmUiLCJleHAiOiIxNzgxNTg2MDAwIiwiaWF0IjoiMTc1MDEwNDUyMiIsImFjY291bnRfaWQiOiJmMzQ4N2NhOWE5MDE0NWRlYmE4NGY4NDkwNDgxNWQ3NiIsImN1c3RvbWVyX2lkIjoiY3RtXzAxanhhcTVkcHNleHFmZmF0eDhkd3Ntd3Y2IiwiY29tcGFueSI6Ik15IFRlc3QgQ29tcGFueSIsInN1Yl9pZCI6InN1Yl8wMWp4eDVxZ3BnbTF0NDBhdDh2cGQzbm0zaCIsImVkaXRpb24iOiIyIiwidHlwZSI6IjEifQ.W-0ScVg5GxZ6R2ZcZfz8z5nnVAhEcMggnFLvyifm15ox9gei6xm6W4Wo1_RC75XqLzWyDqGp2lvgxucJqCDy3EpasDLADjyfRpqt14nZ81BnbjYgufERbfBRlX8i8O4ZfGg0BNb_nFNIP0XKuww4GGJ854HZOJds0CI31CH4JaghQkUSTaDaxGcrqb7K9RiWR90OhdkiUPBHk1p-EO2nogVFNothozEWKgCgVocvi9MguQBlJDC_e5Rg7c9XZdzTCkzwJAXAVdjoXaOvkPxTVSH09eOALuUXhi-FtKRzGVvVbqFVdEmiUDSPSs2ULeWz8GlfC1V33Wz2f3y69Lr9KA"
+                "<>"
         };
         var licenseAccessor = new LicenseAccessor(config, factory);
 
