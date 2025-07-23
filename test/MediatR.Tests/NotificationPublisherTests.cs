@@ -53,6 +53,7 @@ public class NotificationPublisherTests
         var sequentialElapsed = timer.ElapsedMilliseconds;
 
         services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining<Notification>();

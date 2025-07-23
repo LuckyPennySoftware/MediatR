@@ -305,6 +305,7 @@ public class SendTests
         var dependency = new Dependency();
         var services = new ServiceCollection();
         services.AddSingleton(dependency);
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
@@ -327,6 +328,7 @@ public class SendTests
     {
         var dependency = new Dependency();
         var services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddSingleton(dependency);
         services.AddMediatR(cfg => 
         {

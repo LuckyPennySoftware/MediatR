@@ -30,6 +30,12 @@
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath=""/>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>MediatR.Tests, PublicKey=002400000480000094000000060200000024000052534131000400000100010091986edd141861f402457659cb82b56cf6a0d60b3bd2e5aa4ea73d88afa929d278462d6c4c0e2ecbce21948c15514a310a82e6b2e6beaab6cb14230a03bc026609be59f938423f2490fa0033ae87a982fb4950db77d1a4635e14f7727161e93e5511de766ed8e515efd801464b7820a27fca30a32161485824e442cc5ffecfbe</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="IsExternalInit" Version="1.0.3">

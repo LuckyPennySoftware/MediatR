@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS8002;</NoWarn>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
