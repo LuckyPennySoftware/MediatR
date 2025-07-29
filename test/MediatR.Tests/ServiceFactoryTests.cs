@@ -9,6 +9,10 @@ using Xunit;
 
 namespace MediatR.Tests;
 
+[CollectionDefinition(nameof(ServiceFactoryCollectionBehavior), DisableParallelization = true)]
+public class ServiceFactoryCollectionBehavior {}
+
+[Collection(nameof(ServiceFactoryCollectionBehavior))]
 public class ServiceFactoryTests
 {
     public class Ping : IRequest<Pong>
