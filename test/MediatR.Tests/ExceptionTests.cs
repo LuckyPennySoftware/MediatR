@@ -5,9 +5,7 @@ namespace MediatR.Tests;
 using System;
 using System.Threading.Tasks;
 using Shouldly;
-using Lamar;
 using Xunit;
-using Lamar.IoC;
 
 public class ExceptionTests
 {
@@ -73,21 +71,21 @@ public class ExceptionTests
     {
         var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        _mediator = container.GetInstance<IMediator>();
+        _mediator = container.GetRequiredService<IMediator>();
     }
 
     [Fact]
     public async Task Should_throw_for_send()
     {
-        await Should.ThrowAsync<LamarMissingRegistrationException>(async () => await _mediator.Send(new Ping()));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new Ping()));
     }
 
     [Fact]
     public async Task Should_throw_for_void_send()
     {
-        await Should.ThrowAsync<LamarMissingRegistrationException>(async () => await _mediator.Send(new VoidPing()));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new VoidPing()));
     }
 
     [Fact]
@@ -108,13 +106,13 @@ public class ExceptionTests
     [Fact]
     public async Task Should_throw_for_async_send()
     {
-        await Should.ThrowAsync<LamarMissingRegistrationException>(async () => await _mediator.Send(new AsyncPing()));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncPing()));
     }
 
     [Fact]
     public async Task Should_throw_for_async_void_send()
     {
-        await Should.ThrowAsync<LamarMissingRegistrationException>(async () => await _mediator.Send(new AsyncVoidPing()));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncVoidPing()));
     }
 
     [Fact]
@@ -139,14 +137,13 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(NullPing));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.FromAssemblyOf<NullPing>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         NullPing request = null!;
 
@@ -160,14 +157,13 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(VoidNullPing));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.FromAssemblyOf<VoidNullPing>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         VoidNullPing request = null!;
 
@@ -181,14 +177,13 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(NullPinged));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.FromAssemblyOf<NullPinged>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         NullPinged notification = null!;
 
@@ -202,14 +197,13 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(NullPinged));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.FromAssemblyOf<NullPinged>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         object notification = null!;
 
@@ -223,14 +217,13 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(NullPinged));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.FromAssemblyOf<NullPinged>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         object notification = "totally not notification";
 
@@ -257,15 +250,14 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(NullPinged));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                scanner.AddAllTypesOf(typeof(IRequestHandler<>));
+                scanner.FromAssemblyOf<NullPinged>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         object pingException = new PingException();
 
@@ -279,14 +271,13 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(NullPinged));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.FromAssemblyOf<NullPinged>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         object nonRequest = new NonRequest();
 
@@ -306,15 +297,14 @@ public class ExceptionTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(NullPinged));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                scanner.AddAllTypesOf(typeof(IRequestHandler<>));
+                scanner.FromAssemblyOf<NullPinged>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         PingException pingException = new PingException();
 

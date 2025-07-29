@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// This does not scan for any <see cref="IPipelineBehavior{TRequest,TResponse}"/> instances including <see cref="RequestPreProcessorBehavior{TRequest,TResponse}"/> and <see cref="RequestPreProcessorBehavior{TRequest,TResponse}"/>.
 /// To register behaviors, use the <see cref="ServiceCollectionServiceExtensions.AddTransient(IServiceCollection,Type,Type)"/> with the open generic or closed generic types.
 /// </summary>
-public static class ServiceCollectionExtensions
+public static class MediatRServiceCollectionExtensions
 {
     /// <summary>
     /// Registers handlers and mediator types from the specified assemblies

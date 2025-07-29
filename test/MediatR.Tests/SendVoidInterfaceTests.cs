@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Shouldly;
-using Lamar;
 using Xunit;
 
 public class SendVoidInterfaceTests
@@ -36,18 +35,17 @@ public class SendVoidInterfaceTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
-                scanner.AddAllTypesOf(typeof (IRequestHandler<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<TextWriter>().Use(writer);
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddSingleton<TextWriter>(writer);
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         await mediator.Send(new Ping { Message = "Ping" });
 

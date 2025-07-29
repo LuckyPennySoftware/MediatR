@@ -392,7 +392,7 @@ public static class ServiceRegistrar
         services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
 
-        ServiceCollectionExtensions.LicenseChecked = false;
+        MediatRServiceCollectionExtensions.LicenseChecked = false;
         
         services.TryAddSingleton(serviceConfiguration);
         services.TryAddSingleton<LicenseAccessor>();

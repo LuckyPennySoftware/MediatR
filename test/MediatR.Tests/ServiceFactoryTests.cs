@@ -24,7 +24,7 @@ public class ServiceFactoryTests
     [Fact]
     public async Task Should_throw_given_no_handler()
     {
-        ServiceCollectionExtensions.LicenseChecked = false;
+        MediatRServiceCollectionExtensions.LicenseChecked = false;
       
         var serviceCollection = new ServiceCollection();
         ServiceRegistrar.AddRequiredServices(serviceCollection, new MediatRServiceConfiguration());
@@ -42,7 +42,7 @@ public class ServiceFactoryTests
     [Fact]
     public void Should_not_throw_with_manual_registration()
     {
-        ServiceCollectionExtensions.LicenseChecked = false;
+        MediatRServiceCollectionExtensions.LicenseChecked = false;
       
         var services = new ServiceCollection();
         services.AddFakeLogging();
@@ -57,7 +57,7 @@ public class ServiceFactoryTests
     [Fact]
     public void Should_throw_when_missing_required_configuration()
     {
-        ServiceCollectionExtensions.LicenseChecked = false;
+        MediatRServiceCollectionExtensions.LicenseChecked = false;
         
         var services = new ServiceCollection();
         services.AddFakeLogging();

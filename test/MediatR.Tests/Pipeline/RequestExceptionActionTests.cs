@@ -1,5 +1,4 @@
 using MediatR.Pipeline;
-using Lamar;
 
 namespace MediatR.Tests.Pipeline;
 
@@ -97,15 +96,15 @@ public class RequestExceptionActionTests
         
         var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionAction<Ping, PingException>>().Use(_ => pingExceptionAction);
-            cfg.For<IRequestExceptionAction<Ping, PingPongException>>().Use(_ => pingPongExceptionAction);
-            cfg.For<IRequestExceptionAction<Ping, PongException>>().Use(_ => pongExceptionAction);
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionActionProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IRequestHandler<Ping, Pong>, PingHandler>();
+            cfg.AddTransient<IRequestExceptionAction<Ping, PingException>>(_ => pingExceptionAction);
+            cfg.AddTransient<IRequestExceptionAction<Ping, PingPongException>>(_ => pingPongExceptionAction);
+            cfg.AddTransient<IRequestExceptionAction<Ping, PongException>>(_ => pongExceptionAction);
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestExceptionActionProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var request = new Ping { Message = "Ping!" };
         await Assert.ThrowsAsync<PingException>(() => mediator.Send(request));
@@ -121,13 +120,13 @@ public class RequestExceptionActionTests
         var genericExceptionAction = new GenericExceptionAction<Ping>();
         var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionAction<Ping, Exception>>().Use(_ => genericExceptionAction);
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionActionProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IRequestHandler<Ping, Pong>, PingHandler>();
+            cfg.AddTransient<IRequestExceptionAction<Ping, Exception>>(_ => genericExceptionAction);
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestExceptionActionProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var request = new Ping { Message = "Ping!" };
         await Assert.ThrowsAsync<PingException>(() => mediator.Send(request));

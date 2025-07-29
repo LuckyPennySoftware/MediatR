@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MediatR.Tests.Pipeline.Streams;
 
 using Shouldly;
-using Lamar;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
