@@ -36,9 +36,8 @@ public class SendVoidInterfaceTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<TextWriter>(writer);
             cfg.AddTransient<IMediator, Mediator>();

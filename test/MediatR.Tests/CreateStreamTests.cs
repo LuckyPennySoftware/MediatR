@@ -38,8 +38,7 @@ public class CreateStreamTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<CreateStreamTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -69,8 +68,7 @@ public class CreateStreamTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<CreateStreamTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -101,8 +99,7 @@ public class CreateStreamTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<CreateStreamTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<ISender, Mediator>();
         });

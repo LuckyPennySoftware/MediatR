@@ -58,8 +58,7 @@ public class PublishTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<TextWriter>(writer);
             cfg.AddTransient<IMediator, Mediator>();
@@ -85,8 +84,7 @@ public class PublishTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<TextWriter>(writer);
             cfg.AddTransient<IMediator, Mediator>();
@@ -143,8 +141,7 @@ public class PublishTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<TextWriter>(writer);
             cfg.AddTransient<IMediator, SequentialMediator>();
@@ -171,8 +168,7 @@ public class PublishTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<TextWriter>(writer);
             cfg.AddSingleton<INotificationPublisher>(publisher);
@@ -200,8 +196,7 @@ public class PublishTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<TextWriter>(writer);
             cfg.AddTransient<IMediator, SequentialMediator>();
@@ -229,8 +224,7 @@ public class PublishTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<TextWriter>(writer);
             cfg.AddTransient<IPublisher, Mediator>();

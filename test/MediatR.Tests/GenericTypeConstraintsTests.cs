@@ -93,10 +93,8 @@ public class GenericTypeConstraintsTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<GenericTypeConstraintsTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.InNamespaceOf<Jing>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });

@@ -248,8 +248,7 @@ public class PipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
             cfg.AddTransient<IPipelineBehavior<Ping, Pong>, OuterBehavior>();
@@ -282,8 +281,7 @@ public class PipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
             cfg.AddTransient<IPipelineBehavior<VoidPing, Unit>, OuterVoidBehavior>();
@@ -314,8 +312,7 @@ public class PipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
 
@@ -350,9 +347,8 @@ public class PipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
 
@@ -385,8 +381,7 @@ public class PipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
 

@@ -199,8 +199,7 @@ public class StreamPipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
             cfg.AddTransient<IStreamPipelineBehavior<Ping, Pong>, OuterBehavior>();
@@ -234,8 +233,7 @@ public class StreamPipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
 
@@ -271,8 +269,7 @@ public class StreamPipelineTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddSingleton<Logger>(output);
 

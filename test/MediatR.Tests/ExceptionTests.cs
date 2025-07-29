@@ -138,8 +138,7 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<NullPing>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -158,8 +157,7 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<VoidNullPing>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -178,8 +176,7 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<NullPinged>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -198,8 +195,7 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<NullPinged>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -218,8 +214,7 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<NullPinged>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -251,9 +246,8 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<NullPinged>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -272,8 +266,7 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<NullPinged>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
@@ -298,9 +291,8 @@ public class ExceptionTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<NullPinged>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
             cfg.AddTransient<IMediator, Mediator>();
         });
