@@ -45,9 +45,7 @@ public class RequestPreProcessorTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestPreProcessor<>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces();
             });
             cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
             cfg.AddTransient<IMediator, Mediator>();

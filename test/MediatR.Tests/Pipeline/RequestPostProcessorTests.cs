@@ -45,9 +45,7 @@ public class RequestPostProcessorTests
             cfg.Scan(scanner =>
             {
                 scanner.FromAssemblyOf<PublishTests>()
-                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
-                    .AddClasses(t => t.AssignableTo(typeof(IRequestPostProcessor<,>))).AsImplementedInterfaces();
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces();
             });
             cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>));
             cfg.AddTransient<IMediator, Mediator>();
