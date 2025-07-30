@@ -1,4 +1,3 @@
-using Lamar;
 using MediatR.Licensing;
 using MediatR.Registration;
 using Microsoft.Extensions.Logging;
@@ -8,18 +7,23 @@ namespace MediatR.Tests;
 
 public static class TestContainer
 {
-    public static Container Create(Action<ServiceRegistry> config)
+    public static IServiceProvider Create(Action<ServiceCollection> config)
     {
-        Action<ServiceRegistry> configAction = cfg =>
+        var services = new ServiceCollection();
+        
+        ConfigAction(services);
+
+        var container = services.BuildServiceProvider();
+
+        return container;
+
+        void ConfigAction(ServiceCollection cfg)
         {
-            cfg.ForSingletonOf<ILoggerFactory>().Use(new NullLoggerFactory());
-            
+            cfg.AddSingleton<ILoggerFactory, NullLoggerFactory>();
+
             ServiceRegistrar.AddRequiredServices(cfg, new MediatRServiceConfiguration());
 
             config(cfg);
-        };
-        var container = new Container(configAction);
-
-        return container;
+        }
     } 
 }

@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS8002;</NoWarn>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,16 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\src\MediatR\Licensing\**\*.cs" LinkBase="LicensingFiles" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="IsExternalInit" Version="1.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Lamar" Version="8.1.0"  Condition="'$(TargetFramework)' == 'net481'" />
-    <PackageReference Include="Lamar" Version="13.1.0" Condition="'$(TargetFramework)' == 'net9.0'"/>
+    <PackageReference Include="Scrutor" Version="6.1.0" />
     <PackageReference Include="xunit" Version="2.6.1"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
     <PackageReference Include="Shouldly" Version="4.2.1"/>

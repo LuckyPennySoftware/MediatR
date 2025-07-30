@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Shouldly;
-using Lamar;
 using Xunit;
 
 public class CreateStreamTests
@@ -38,15 +37,13 @@ public class CreateStreamTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(CreateStreamTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
+                scanner.FromAssemblyOf<CreateStreamTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var response = mediator.CreateStream(new Ping { Message = "Ping" });
         int i = 0;
@@ -70,15 +67,13 @@ public class CreateStreamTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(CreateStreamTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
+                scanner.FromAssemblyOf<CreateStreamTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         object request = new Ping { Message = "Ping" };
         var response = mediator.CreateStream(request);
@@ -103,15 +98,13 @@ public class CreateStreamTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(CreateStreamTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
+                scanner.FromAssemblyOf<CreateStreamTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IStreamRequestHandler<,>))).AsImplementedInterfaces();
             });
-            cfg.For<ISender>().Use<Mediator>();
+            cfg.AddTransient<ISender, Mediator>();
         });
 
-        var mediator = container.GetInstance<ISender>();
+        var mediator = container.GetRequiredService<ISender>();
         var response = mediator.CreateStream(new Ping { Message = "Ping" });
         int i = 0;
         await foreach (Pong result in response)
@@ -132,10 +125,10 @@ public class CreateStreamTests
     {
         var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         Should.Throw<ArgumentNullException>(() => mediator.CreateStream((Ping) null!));
     }
@@ -145,10 +138,10 @@ public class CreateStreamTests
     {
         var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         Should.Throw<ArgumentNullException>(() => mediator.CreateStream((object) null!));
     }

@@ -5,7 +5,6 @@ namespace MediatR.Tests.Pipeline;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Shouldly;
-using Lamar;
 using Xunit;
 
 public class RequestPreProcessorTests
@@ -45,17 +44,14 @@ public class RequestPreProcessorTests
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                scanner.AddAllTypesOf(typeof(IRequestPreProcessor<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces();
             });
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var response = await mediator.Send(new Ping { Message = "Ping" });
 
