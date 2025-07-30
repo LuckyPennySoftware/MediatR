@@ -5,7 +5,6 @@ using MediatR.Licensing;
 using MediatR.Pipeline;
 using MediatR.Registration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
