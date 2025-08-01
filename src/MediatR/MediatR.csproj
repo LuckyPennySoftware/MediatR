@@ -25,6 +25,10 @@
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
+    <TargetFrameworks>$(TargetFrameworks);net462</TargetFrameworks>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="..\..\assets\logo\gradient_128x128.png" Pack="true" PackagePath="" />
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath=""/>
@@ -45,7 +49,7 @@
     <PackageReference Include="MediatR.Contracts" Version="[2.0.1, 3.0.0)" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="[8.0.0, )" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[8.0.0, )" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="[8.0.0, )" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[8.0.0, )" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="[8.0.1, )" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="All" />
