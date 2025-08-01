@@ -28,7 +28,7 @@ if(Test-Path $artifacts) { Remove-Item $artifacts -Force -Recurse }
 
 exec { & dotnet clean -c Release }
 
-exec { & dotnet build -c Release -v d }
+exec { & dotnet build -c Release }
 
 exec { & dotnet test -c Release --no-build -l trx --verbosity=normal }
 
