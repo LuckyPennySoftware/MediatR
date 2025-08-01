@@ -4,6 +4,10 @@ on:
   push:
     tags:
     - '*.*.*'
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  MINVERBUILDMETADATA: build.${{ github.run_id }}.${{ github.run_attempt}}
 jobs:
   build:
     strategy:
