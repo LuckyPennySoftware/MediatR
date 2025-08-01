@@ -17,7 +17,6 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageProjectUrl>https://mediatr.io</PackageProjectUrl>
     <MinVerTagPrefix>v</MinVerTagPrefix>
-    <MinVerVerbosity>diagnostic</MinVerVerbosity>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
