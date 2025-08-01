@@ -3,6 +3,7 @@ using MediatR.Tests.MicrosoftExtensionsDI;
 
 namespace MediatR.Tests
 {
+    [Collection(nameof(ServiceFactoryCollectionBehavior))]
     public class GenericRequestHandlerTests : BaseGenericRequestHandlerTests
     {
 
