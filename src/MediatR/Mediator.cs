@@ -42,6 +42,11 @@ public class Mediator : IMediator
         _serviceProvider.CheckLicense();
     }
 
+    /// <summary>
+    /// Gets or sets the license key. You can find your license key in your <a href="https://luckypennysoftware.com/account">account</a>.
+    /// </summary>
+    public static string? LicenseKey { get; set; }
+
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         if (request == null)

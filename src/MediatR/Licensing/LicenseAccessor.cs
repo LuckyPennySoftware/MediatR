@@ -12,12 +12,17 @@ namespace MediatR.Licensing;
 
 internal class LicenseAccessor
 {
-    private readonly MediatRServiceConfiguration _configuration;
+    private readonly MediatRServiceConfiguration? _configuration;
     private readonly ILogger _logger;
 
     public LicenseAccessor(MediatRServiceConfiguration configuration, ILoggerFactory loggerFactory)
     {
         _configuration = configuration;
+        _logger = loggerFactory.CreateLogger("LuckyPennySoftware.MediatR.License");
+    }   
+    
+    public LicenseAccessor(ILoggerFactory loggerFactory)
+    {
         _logger = loggerFactory.CreateLogger("LuckyPennySoftware.MediatR.License");
     }
     
@@ -35,7 +40,10 @@ internal class LicenseAccessor
                 return _license;
             }
 
-            var key = _configuration.LicenseKey;
+            var key = _configuration?.LicenseKey
+                      ?? Mediator.LicenseKey
+                      ?? null;
+            
             if (key == null)
             {
                 return new License();
