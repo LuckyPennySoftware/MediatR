@@ -12,9 +12,9 @@ jobs:
   build:
     strategy:
       matrix: 
-        os: [windows-latest]
+        os: [windows-2025]
       fail-fast: false
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
     - name: Checkout
       uses: actions/checkout@v4
