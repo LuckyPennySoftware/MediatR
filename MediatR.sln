@@ -48,6 +48,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.SimpleInje
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Stashbox", "samples\MediatR.Examples.Stashbox\MediatR.Examples.Stashbox.csproj", "{F9148E20-5856-484C-8410-B515C6C56214}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.DependencyInjectionTests", "test\MediatR.DependencyInjectionTests\MediatR.DependencyInjectionTests.csproj", "{C761C0E2-0655-40FB-98E9-1504D03DD930}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,10 @@ Global
 		{F9148E20-5856-484C-8410-B515C6C56214}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9148E20-5856-484C-8410-B515C6C56214}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9148E20-5856-484C-8410-B515C6C56214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C761C0E2-0655-40FB-98E9-1504D03DD930}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C761C0E2-0655-40FB-98E9-1504D03DD930}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C761C0E2-0655-40FB-98E9-1504D03DD930}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C761C0E2-0655-40FB-98E9-1504D03DD930}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -124,6 +130,7 @@ Global
 		{004D029A-43E7-47B0-BA74-D0A9F7FC7713} = {E372BF0B-90E8-4DC1-A332-F023095A3C2A}
 		{7CEB57F2-B6DC-4A18-A040-D12555C3D32F} = {E372BF0B-90E8-4DC1-A332-F023095A3C2A}
 		{F9148E20-5856-484C-8410-B515C6C56214} = {E372BF0B-90E8-4DC1-A332-F023095A3C2A}
+		{C761C0E2-0655-40FB-98E9-1504D03DD930} = {962C5ACA-AB2B-4E9B-9EBB-7E7EE28CDBB1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D58286E3-878B-4ACB-8E76-F61E708D4339}
