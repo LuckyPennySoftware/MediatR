@@ -12,6 +12,7 @@ public class AutoFacServiceProviderFixture : BaseServiceProviderFixture
         get
         {
             var services = new ServiceCollection();
+            services.AddFakeLogging();
             services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining(typeof(Pong)));
 
             var builder = new ContainerBuilder();

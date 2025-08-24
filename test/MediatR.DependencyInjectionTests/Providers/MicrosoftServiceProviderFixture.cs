@@ -6,6 +6,7 @@ namespace MediatR.DependencyInjectionTests.Providers;
 public class MicrosoftServiceProviderFixture : BaseServiceProviderFixture
 {
     public override IServiceProvider Provider => new ServiceCollection()
+        .AddFakeLogging()
         .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(PublicPing).Assembly))
         .BuildServiceProvider();
 }

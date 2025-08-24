@@ -4,12 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.DependencyInjectionTests.Abstractions;
 
-public abstract class BaseAssemblyResolutionTests : IClassFixture<BaseServiceProviderFixture>
+public abstract class BaseAssemblyResolutionTests(BaseServiceProviderFixture fixture) : IClassFixture<BaseServiceProviderFixture>
 {
-    private readonly IServiceProvider _provider;
-
-    protected BaseAssemblyResolutionTests(BaseServiceProviderFixture fixture) =>
-        _provider = fixture.Provider;
+    private readonly IServiceProvider _provider = fixture.Provider;
 
     [Fact]
     public void Should_Resolve_Mediator() =>
