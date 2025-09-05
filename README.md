@@ -99,4 +99,15 @@ services.AddMediatR(cfg =>
 })
 ```
 
+Or if not using Microsoft.Extensions.DependencyInjection:
+
+```csharp
+Mediator.LicenseKey = "<license key here>";
+```
+
+> [!TIP]
+> The license key does not need to be set on client applications (such as Blazor WASM).
+> Turn off the license warning by configuring logging in your logging start configuration:
+> `builder.Logging.AddFilter("LuckyPennySoftware.AutoMapper.License", LogLevel.None);`
+
 You can register for your license key at [MediatR.io](https://mediatr.io)

@@ -4,7 +4,7 @@
     <IsWindows>$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::get_Windows())))</IsWindows>
 
     <LangVersion>13.0</LangVersion>
-    <NoWarn>$(NoWarn);CS1701;CS1702;CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CS1701;CS1702;CS1591;NU1900</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>

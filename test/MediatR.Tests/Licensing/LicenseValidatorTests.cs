@@ -140,4 +140,27 @@ public class LicenseValidatorTests
         logMessages
             .ShouldNotContain(log => log.Level == LogLevel.Error);
     }
+    
+    [Fact(Skip = "Needs license")]
+    public void Should_return_valid_for_actual_valid_license_via_static_property()
+    {
+        var factory = new LoggerFactory();
+        var provider = new FakeLoggerProvider();
+        factory.AddProvider(provider);
+
+        Mediator.LicenseKey = "<>";
+        var licenseAccessor = new LicenseAccessor(factory);
+
+        var licenseValidator = new LicenseValidator(factory);
+        var license = licenseAccessor.Current;
+        
+        license.IsConfigured.ShouldBeTrue();
+        
+        licenseValidator.Validate(license);
+
+        var logMessages = provider.Collector.GetSnapshot();
+     
+        logMessages
+            .ShouldNotContain(log => log.Level == LogLevel.Error);
+    }
 }
