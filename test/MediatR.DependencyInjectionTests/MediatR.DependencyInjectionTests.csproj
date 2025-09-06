@@ -21,10 +21,11 @@
         <PackageReference Include="xunit" Version="2.5.3"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2"/>
         <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.0.0"/>
         <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0"/>
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0"/>
+        <PackageReference Include="LightInject.Microsoft.DependencyInjection" Version="4.0.3" />
     </ItemGroup>
 
     <ItemGroup>
