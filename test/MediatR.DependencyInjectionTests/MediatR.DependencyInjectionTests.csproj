@@ -26,6 +26,7 @@
         <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0"/>
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0"/>
         <PackageReference Include="LightInject.Microsoft.DependencyInjection" Version="4.0.3" />
+        <PackageReference Include="Stashbox.Extensions.DependencyInjection" Version="5.7.0" />
     </ItemGroup>
 
     <ItemGroup>
