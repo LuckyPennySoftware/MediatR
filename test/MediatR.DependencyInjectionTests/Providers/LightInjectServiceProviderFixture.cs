@@ -1,4 +1,3 @@
-using DryIoc.Microsoft.DependencyInjection;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
 using MediatR.DependencyInjectionTests.Abstractions;
