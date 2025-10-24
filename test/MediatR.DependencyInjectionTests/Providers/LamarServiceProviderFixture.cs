@@ -15,7 +15,6 @@ public class LamarServiceProviderFixture : BaseServiceProviderFixture
             services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining(typeof(Pong)));
             var c = new Container(services);
             return c.ServiceProvider;
-
         }
     }
 }
