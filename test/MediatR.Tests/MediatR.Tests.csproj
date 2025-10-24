@@ -14,7 +14,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj"/>
+    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,13 +23,15 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Scrutor" Version="6.1.0" />
-    <PackageReference Include="xunit" Version="2.6.1"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
-    <PackageReference Include="Shouldly" Version="4.2.1"/>
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6"/>
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.6.0"/>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <PackageReference Include="xunit" Version="2.6.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.6.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
