@@ -10,7 +10,6 @@ public class StashBoxServiceProviderFixture : BaseServiceProviderFixture
     {
         get
         {
-
             var services = new ServiceCollection();
             services.AddFakeLogging();
             services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining(typeof(Pong)));
