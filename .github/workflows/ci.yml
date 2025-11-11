@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-    - master
+    - main
   pull_request:
 env:
   DOTNET_NOLOGO: true
@@ -28,7 +28,7 @@ jobs:
       run: ./Build.ps1
       shell: pwsh
     - name: Push to MyGet
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/main'
       env:
         NUGET_URL: https://f.feedz.io/lucky-penny-software/mediatr/nuget/index.json
         NUGET_API_KEY: ${{ secrets.FEEDZIO_ACCESS_TOKEN }}
