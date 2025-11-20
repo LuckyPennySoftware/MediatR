@@ -9,6 +9,9 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   MINVERBUILDMETADATA: build.${{ github.run_id }}.${{ github.run_attempt}}
+permissions:
+  id-token: write
+  contents: read
 jobs:
   build:
     runs-on: windows-latest
@@ -18,6 +21,12 @@ jobs:
       with:
         fetch-depth: 0
         filter: tree:0
+    - name: Azure Login via OIDC
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
@@ -25,9 +34,16 @@ jobs:
           8.0.x
           9.0.x
           10.0.x
+    - name: Install NuGetKeyVaultSignTool
+      run: dotnet tool install --global NuGetKeyVaultSignTool
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh
+    - name: Sign packages
+      run: |-
+        foreach ($f in Get-ChildItem "./artifacts" -Filter "*.nupkg") {
+          NuGetKeyVaultSignTool sign $f.FullName --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --azure-key-vault-managed-identity --azure-key-vault-url ${{ secrets.AZURE_KEYVAULT_URI }} --azure-key-vault-certificate ${{ secrets.CODESIGN_CERT_NAME }}
+        }
     - name: Push to MyGet
       if: github.ref == 'refs/heads/main'
       env:
