@@ -22,3 +22,4 @@ core.eol crlf
 *.fsproj merge=union 
 *.dbproj merge=union 
 *.sln merge=union
+*.slnx merge=union

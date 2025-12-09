@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/MediatR.Examples.AspNetCore/MediatR.Examples.AspNetCore.csproj" />
+    <Project Path="samples/MediatR.Examples.Autofac/MediatR.Examples.Autofac.csproj" />
+    <Project Path="samples/MediatR.Examples.DryIoc/MediatR.Examples.DryIoc.csproj" />
+    <Project Path="samples/MediatR.Examples.Lamar/MediatR.Examples.Lamar.csproj" />
+    <Project Path="samples/MediatR.Examples.LightInject/MediatR.Examples.LightInject.csproj" />
+    <Project Path="samples/MediatR.Examples.PublishStrategies/MediatR.Examples.PublishStrategies.csproj" />
+    <Project Path="samples/MediatR.Examples.SimpleInjector/MediatR.Examples.SimpleInjector.csproj" />
+    <Project Path="samples/MediatR.Examples.Stashbox/MediatR.Examples.Stashbox.csproj" />
+    <Project Path="samples/MediatR.Examples/MediatR.Examples.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path="Build.ps1" />
+    <File Path="BuildContracts.ps1" />
+    <File Path="Directory.Build.props" />
+    <File Path="MediatR.snk" />
+    <File Path="Push.ps1" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/MediatR.Contracts/MediatR.Contracts.csproj" />
+    <Project Path="src/MediatR/MediatR.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/MediatR.Benchmarks/MediatR.Benchmarks.csproj" />
+    <Project Path="test/MediatR.DependencyInjectionTests/MediatR.DependencyInjectionTests.csproj" />
+    <Project Path="test/MediatR.Tests/MediatR.Tests.csproj" />
+  </Folder>
+</Solution>
