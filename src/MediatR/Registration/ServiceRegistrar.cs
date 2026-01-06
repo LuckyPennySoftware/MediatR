@@ -139,7 +139,31 @@ public static class ServiceRegistrar
             {
                 foreach (var type in exactMatches)
                 {
-                    services.AddTransient(@interface, type);
+                    var implementedInterfaces = type.FindInterfacesThatClose(openRequestInterface).ToList();
+                    var directlyImplements = implementedInterfaces.Any(i => i == @interface);
+                    
+                    if (directlyImplements)
+                    {
+                        // Directly implements this interface, register it
+                        services.AddTransient(@interface, type);
+                    }
+                    else
+                    {
+                        // Handler implements a different notification type, check if we should register through contravariance
+                        // Only register contravariant matches when the handler's notification type is abstract or an interface
+                        // This allows INotificationHandler<INotification> to handle all notifications,
+                        // but prevents INotificationHandler<ConcreteBase> from automatically handling INotificationHandler<ConcreteDerived>
+                        var shouldRegisterContravariant = implementedInterfaces.Any(i =>
+                        {
+                            var notificationType = i.GenericTypeArguments.FirstOrDefault();
+                            return notificationType != null && (notificationType.IsInterface || notificationType.IsAbstract);
+                        });
+
+                        if (shouldRegisterContravariant)
+                        {
+                            services.AddTransient(@interface, type);
+                        }
+                    }
                 }
             }
             else
