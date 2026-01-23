@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
+﻿namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
 using System;
 using System.Linq;

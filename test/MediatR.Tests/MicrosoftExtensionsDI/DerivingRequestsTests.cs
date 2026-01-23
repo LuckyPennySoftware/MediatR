@@ -1,10 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using Xunit;
-
-namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
+﻿namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
 public class DerivingRequestsTests
 {

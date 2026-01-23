@@ -1,9 +1,5 @@
-﻿using System.Threading;
-using Microsoft.Extensions.DependencyInjection;
+﻿namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
-namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
-
-using System.Reflection;
 using System.Threading.Tasks;
 using Shouldly;
 using Xunit;

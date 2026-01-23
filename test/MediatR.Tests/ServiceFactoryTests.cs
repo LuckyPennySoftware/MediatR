@@ -1,10 +1,4 @@
-using System;
-using System.Collections;
-using System.Linq;
-using System.Threading.Tasks;
 using MediatR.Registration;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace MediatR.Tests;
 

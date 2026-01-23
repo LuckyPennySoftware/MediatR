@@ -1,12 +1,4 @@
-using System.Threading;
-
-using System;
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
-using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using MediatR.Pipeline;
 
 namespace MediatR.Tests;
 public class SendTests

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 

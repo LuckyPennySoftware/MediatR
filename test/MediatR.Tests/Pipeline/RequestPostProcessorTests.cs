@@ -1,5 +1,3 @@
-using System.Threading;
-
 namespace MediatR.Tests.Pipeline;
 
 using System.Threading.Tasks;

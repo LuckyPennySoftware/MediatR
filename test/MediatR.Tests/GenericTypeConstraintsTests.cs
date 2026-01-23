@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Threading;
 
 namespace MediatR.Tests;
 

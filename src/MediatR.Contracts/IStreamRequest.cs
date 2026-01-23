@@ -1,4 +1,4 @@
-namespace MediatR;
+namespace Deluxe.MediatR;
 
 /// <summary>
 /// Marker interface to represent a request with a streaming response

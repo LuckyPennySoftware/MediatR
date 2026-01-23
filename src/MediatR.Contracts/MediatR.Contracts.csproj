@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <Authors>Jimmy Bogard</Authors>
+    <Authors>Jimmy Bogard, Deluxe</Authors>
     <Description>Contracts package for requests, responses, and notifications</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

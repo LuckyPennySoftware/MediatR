@@ -1,12 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using MediatR.NotificationPublishers;
-using Shouldly;
-using Xunit;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 

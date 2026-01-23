@@ -1,5 +1,3 @@
-using System.Threading;
-
 namespace MediatR.Tests;
 
 using System.Collections.Generic;

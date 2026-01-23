@@ -1,7 +1,3 @@
-using System.Threading;
-using MediatR.Registration;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace MediatR.Tests.Pipeline.Streams;
 
 using Shouldly;
