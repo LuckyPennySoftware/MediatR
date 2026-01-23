@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text;
 
-namespace MediatR.Tests;
+namespace Deluxe.MediatR.Tests;
 
 public class NotificationHandlerTests
 {

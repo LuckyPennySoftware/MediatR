@@ -1,10 +1,12 @@
 using Autofac.Extensions.DependencyInjection;
+using Deluxe.MediatR;
+using Deluxe.MediatR.Pipeline;
+using MediatR.Examples.Streams;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.Autofac;
 
 using global::Autofac;
-using MediatR.Pipeline;
 using System;
 using System.IO;
 using System.Reflection;

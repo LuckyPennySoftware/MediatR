@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using MediatR.NotificationPublishers;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.NotificationPublishers;
 
-namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
+namespace Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
 public class NotificationPublisherTests
 {

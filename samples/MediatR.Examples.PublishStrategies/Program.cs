@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Deluxe.MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.PublishStrategies;

@@ -1,11 +1,11 @@
-namespace MediatR.Wrappers;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+
+namespace Deluxe.MediatR.Wrappers;
 
 public abstract class NotificationHandlerWrapper
 {

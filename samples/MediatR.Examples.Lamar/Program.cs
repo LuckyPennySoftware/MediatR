@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Deluxe.MediatR;
+using Deluxe.MediatR.Pipeline;
 using Lamar;
-using MediatR.Pipeline;
 
 namespace MediatR.Examples.Lamar;
 

@@ -1,7 +1,8 @@
 ﻿using System.Linq;
-using MediatR.Tests.MicrosoftExtensionsDI;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
-namespace MediatR.Tests
+namespace Deluxe.MediatR.Tests
 {
     [Collection(nameof(ServiceFactoryCollectionBehavior))]
     public class GenericRequestHandlerTests : BaseGenericRequestHandlerTests

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MediatR;
-using MediatR.Entities;
-using MediatR.NotificationPublishers;
-using MediatR.Pipeline;
-using MediatR.Registration;
+using Deluxe.MediatR.Entities;
+using Deluxe.MediatR.NotificationPublishers;
+using Deluxe.MediatR.Pipeline;
+using Deluxe.MediatR.Registration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Deluxe.MediatR.MicrosoftExtensionsDI;
 
 public class MediatRServiceConfiguration
 {
@@ -38,7 +38,7 @@ public class MediatRServiceConfiguration
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
 
     /// <summary>
-    /// Request exception action processor strategy. Default value is <see cref="DependencyInjection.RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions"/>
+    /// Request exception action processor strategy. Default value is <see cref="MicrosoftExtensionsDI.RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions"/>
     /// </summary>
     public RequestExceptionActionProcessorStrategy RequestExceptionActionProcessorStrategy { get; set; }
         = RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions;

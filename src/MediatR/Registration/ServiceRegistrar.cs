@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using MediatR.Pipeline;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MediatR.Registration;
+namespace Deluxe.MediatR.Registration;
 
 public static class ServiceRegistrar
 {

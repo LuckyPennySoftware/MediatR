@@ -1,8 +1,8 @@
-namespace MediatR.Pipeline;
-
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
+namespace Deluxe.MediatR.Pipeline;
 
 /// <summary>
 /// Behavior for executing all <see cref="IRequestPostProcessor{TRequest,TResponse}"/> instances after handling the request

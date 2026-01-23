@@ -1,14 +1,13 @@
-using MediatR.NotificationPublishers;
-
-namespace MediatR;
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Wrappers;
+using Deluxe.MediatR.NotificationPublishers;
+using Deluxe.MediatR.Wrappers;
+
+namespace Deluxe.MediatR;
 
 /// <summary>
 /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.

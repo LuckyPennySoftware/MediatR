@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
-
-namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
-
-using System;
 using System.Linq;
-using MediatR.Pipeline;
-using Shouldly;
-using Xunit;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.Pipeline;
+
+namespace Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
 public class TypeResolutionTests
 {

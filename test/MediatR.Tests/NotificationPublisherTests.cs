@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics;
-using MediatR.NotificationPublishers;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.NotificationPublishers;
 using Xunit.Abstractions;
 
-namespace MediatR.Tests;
+namespace Deluxe.MediatR.Tests;
 
 public class NotificationPublisherTests
 {

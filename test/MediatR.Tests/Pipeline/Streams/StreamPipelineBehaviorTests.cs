@@ -1,10 +1,8 @@
-namespace MediatR.Tests.Pipeline.Streams;
-
-using Shouldly;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Xunit;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+
+namespace Deluxe.MediatR.Tests.Pipeline.Streams;
 
 public class StreamPipelineBehaviorTests
 {

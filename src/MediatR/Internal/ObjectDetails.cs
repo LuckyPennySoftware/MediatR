@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MediatR.Internal;
+namespace Deluxe.MediatR.Internal;
 
 internal class ObjectDetails : IComparer<ObjectDetails>
 {

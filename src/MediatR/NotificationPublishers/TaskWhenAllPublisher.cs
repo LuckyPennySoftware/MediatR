@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR.NotificationPublishers;
+namespace Deluxe.MediatR.NotificationPublishers;
 
 /// <summary>
 /// Uses Task.WhenAll with the list of Handler tasks:

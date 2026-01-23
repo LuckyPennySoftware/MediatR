@@ -1,7 +1,3 @@
-namespace MediatR.Pipeline;
-
-using Internal;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +5,10 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Deluxe.MediatR.Internal;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Deluxe.MediatR.Pipeline;
 
 /// <summary>
 /// Behavior for executing all <see cref="IRequestExceptionHandler{TRequest,TResponse,TException}"/> instances

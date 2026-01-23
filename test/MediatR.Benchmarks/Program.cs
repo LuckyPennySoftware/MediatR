@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Running;
 
-namespace MediatR.Benchmarks
+namespace Deluxe.MediatR.Benchmarks
 {
     public class Program
     {

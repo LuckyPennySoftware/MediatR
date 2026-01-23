@@ -13,7 +13,7 @@ using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Validators;
 
-namespace MediatR.Benchmarks
+namespace Deluxe.MediatR.Benchmarks
 {
     internal sealed class DotTraceDiagnoserAttribute : Attribute, IConfigSource
     {

@@ -1,6 +1,7 @@
 using System.Reflection;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
 
-namespace MediatR.Tests;
+namespace Deluxe.MediatR.Tests;
 public class SendTests
 {
     private readonly IServiceProvider _serviceProvider;

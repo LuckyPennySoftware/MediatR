@@ -1,12 +1,7 @@
+using System.Linq;
 using System.Reflection;
 
-namespace MediatR.Tests;
-
-using System;
-using System.Linq;
-using Shouldly;
-using System.Threading.Tasks;
-using Xunit;
+namespace Deluxe.MediatR.Tests;
 
 public class GenericTypeConstraintsTests
 {

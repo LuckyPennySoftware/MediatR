@@ -1,10 +1,7 @@
-namespace MediatR.Tests;
-
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
+
+namespace Deluxe.MediatR.Tests;
 
 public class SendVoidInterfaceTests
 {

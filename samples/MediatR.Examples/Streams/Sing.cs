@@ -1,4 +1,6 @@
-namespace MediatR.Examples;
+using Deluxe.MediatR;
+
+namespace MediatR.Examples.Streams;
 
 public class Sing : IStreamRequest<Song>
 {

@@ -1,9 +1,6 @@
-namespace MediatR.Tests.Pipeline;
+using Deluxe.MediatR.Pipeline;
 
-using System.Threading.Tasks;
-using MediatR.Pipeline;
-using Shouldly;
-using Xunit;
+namespace Deluxe.MediatR.Tests.Pipeline;
 
 public class RequestPostProcessorTests
 {

@@ -1,5 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using MediatR;
+using Deluxe.MediatR;
 
 [assembly: TypeForwardedTo(typeof(IBaseRequest))]
 [assembly: TypeForwardedTo(typeof(IRequest<>))]

@@ -1,8 +1,8 @@
-namespace MediatR.Pipeline;
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+
+namespace Deluxe.MediatR.Pipeline;
 
 /// <summary>
 /// Defines an exception handler for a request and response

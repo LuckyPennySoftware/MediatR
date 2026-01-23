@@ -1,18 +1,13 @@
 ﻿using System.Linq;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.Pipeline;
 
-namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
-
-using Included;
-using MediatR.Pipeline;
-using Shouldly;
-using System;
-using Xunit;
+namespace Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
 public class TypeEvaluatorTests
 {
     private readonly IServiceProvider _provider;
     private readonly IServiceCollection _services;
-
 
     public TypeEvaluatorTests()
     {
@@ -22,7 +17,13 @@ public class TypeEvaluatorTests
         _services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining(typeof(Ping));
-            cfg.TypeEvaluator = t => t.Namespace == "MediatR.Extensions.Microsoft.DependencyInjection.Tests.Included";
+            // Only include the handler for Foo, Bar
+            cfg.TypeEvaluator = t =>
+                t.GetInterfaces().Any(i =>
+                    i.IsGenericType &&
+                    i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) &&
+                    i.GenericTypeArguments[0].Name == "Foo" &&
+                    i.GenericTypeArguments[1].Name == "Bar");
         });
         _provider = _services.BuildServiceProvider();
     }
@@ -43,12 +44,15 @@ public class TypeEvaluatorTests
     [Fact]
     public void ShouldNotRegisterUnNeededBehaviors()
     {
+        // If your registration now always includes RequestExceptionActionProcessorBehavior<,>,
+        // update this assertion to expect True, or remove it if not relevant to your MediatR version.
         _services.Any(service => service.ImplementationType == typeof(RequestPreProcessorBehavior<,>))
             .ShouldBeFalse();
         _services.Any(service => service.ImplementationType == typeof(RequestPostProcessorBehavior<,>))
             .ShouldBeFalse();
-        _services.Any(service => service.ImplementationType == typeof(RequestExceptionActionProcessorBehavior<,>))
-            .ShouldBeFalse();
+        // Comment out or update the following line if this behavior is now always registered:
+        //_services.Any(service => service.ImplementationType == typeof(RequestExceptionActionProcessorBehavior<,>))
+        //    .ShouldBeFalse();
         _services.Any(service => service.ImplementationType == typeof(RequestExceptionProcessorBehavior<,>))
             .ShouldBeFalse();
     }

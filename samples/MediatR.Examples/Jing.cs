@@ -1,3 +1,5 @@
+using Deluxe.MediatR;
+
 namespace MediatR.Examples;
 
 public class Jing : IRequest

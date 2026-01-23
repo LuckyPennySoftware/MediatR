@@ -1,12 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
 
-namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
-
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
+namespace Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
 public class StreamPipelineTests
 {

@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using MediatR;
-using MediatR.Pipeline;
-using MediatR.Registration;
+using Deluxe.MediatR.Pipeline;
+using Deluxe.MediatR.Registration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Deluxe.MediatR.MicrosoftExtensionsDI;
 
 /// <summary>
 /// Extensions to scan for MediatR handlers and registers them.

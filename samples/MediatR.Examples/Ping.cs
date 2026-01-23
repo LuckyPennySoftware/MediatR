@@ -1,4 +1,6 @@
-﻿namespace MediatR.Examples;
+﻿using Deluxe.MediatR;
+
+namespace MediatR.Examples;
 
 public class Ping : IRequest<Pong>
 {

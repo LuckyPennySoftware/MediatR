@@ -1,8 +1,9 @@
-using MediatR.Registration;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.Registration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace MediatR.Tests;
+namespace Deluxe.MediatR.Tests;
 
 public static class TestContainer
 {

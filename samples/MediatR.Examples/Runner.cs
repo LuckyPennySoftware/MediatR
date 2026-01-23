@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Text;
+using Deluxe.MediatR;
+using MediatR.Examples.Streams;
 
 namespace MediatR.Examples;
 

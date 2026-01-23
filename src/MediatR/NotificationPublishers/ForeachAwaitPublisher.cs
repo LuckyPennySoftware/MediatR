@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR.NotificationPublishers;
+namespace Deluxe.MediatR.NotificationPublishers;
 
 /// <summary>
 /// Awaits each notification handler in a single foreach loop:

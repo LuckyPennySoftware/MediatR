@@ -1,6 +1,7 @@
-using MediatR.Registration;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.Registration;
 
-namespace MediatR.Tests;
+namespace Deluxe.MediatR.Tests;
 
 [CollectionDefinition(nameof(ServiceFactoryCollectionBehavior), DisableParallelization = true)]
 public class ServiceFactoryCollectionBehavior {}

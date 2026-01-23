@@ -1,9 +1,6 @@
-namespace MediatR.Tests;
-
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
+
+namespace Deluxe.MediatR.Tests;
 
 public class PipelineTests
 {

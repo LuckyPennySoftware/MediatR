@@ -1,8 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace MediatR.Entities;
+namespace Deluxe.MediatR.Entities;
 /// <summary>
 /// Represents a registration entity for pipeline behaviors with a specified service lifetime.
 /// </summary>

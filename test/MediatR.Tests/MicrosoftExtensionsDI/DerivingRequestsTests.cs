@@ -1,4 +1,6 @@
-﻿namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
+﻿using Deluxe.MediatR.MicrosoftExtensionsDI;
+
+namespace Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
 public class DerivingRequestsTests
 {

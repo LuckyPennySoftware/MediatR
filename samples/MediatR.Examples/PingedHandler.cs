@@ -1,4 +1,5 @@
 using System.Threading;
+using Deluxe.MediatR;
 
 namespace MediatR.Examples;
 

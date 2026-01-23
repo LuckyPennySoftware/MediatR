@@ -1,9 +1,7 @@
-﻿namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
+﻿using System.Linq;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
 
-using System;
-using System.Linq;
-using Shouldly;
-using Xunit;
+namespace Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
 public class CustomMediatorTests
 {

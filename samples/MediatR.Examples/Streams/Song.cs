@@ -1,4 +1,4 @@
-namespace MediatR.Examples;
+namespace MediatR.Examples.Streams;
 
 public class Song
 {

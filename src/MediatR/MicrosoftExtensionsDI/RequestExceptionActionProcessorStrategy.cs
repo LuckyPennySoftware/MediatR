@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Extensions.DependencyInjection;
+﻿namespace Deluxe.MediatR.MicrosoftExtensionsDI;
 
 public enum RequestExceptionActionProcessorStrategy
 {

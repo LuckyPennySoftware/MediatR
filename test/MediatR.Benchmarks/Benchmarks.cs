@@ -1,9 +1,10 @@
 using System.IO;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MediatR.Benchmarks
+namespace Deluxe.MediatR.Benchmarks
 {
     [DotTraceDiagnoser]
     public class Benchmarks

@@ -1,8 +1,8 @@
-namespace MediatR.Internal;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+namespace Deluxe.MediatR.Internal;
 
 internal static class HandlersOrderer
 {

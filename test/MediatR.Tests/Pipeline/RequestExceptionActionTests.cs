@@ -1,6 +1,6 @@
-using MediatR.Pipeline;
+using Deluxe.MediatR.Pipeline;
 
-namespace MediatR.Tests.Pipeline;
+namespace Deluxe.MediatR.Tests.Pipeline;
 
 public class RequestExceptionActionTests
 {

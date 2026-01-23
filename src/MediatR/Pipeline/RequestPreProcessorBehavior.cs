@@ -1,8 +1,8 @@
-namespace MediatR.Pipeline;
-
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
+namespace Deluxe.MediatR.Pipeline;
 
 /// <summary>
 /// Behavior for executing all <see cref="IRequestPreProcessor{TRequest}"/> instances before handling a request

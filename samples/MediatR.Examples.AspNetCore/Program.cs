@@ -1,7 +1,10 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using MediatR.Pipeline;
+using Deluxe.MediatR;
+using Deluxe.MediatR.MicrosoftExtensionsDI;
+using Deluxe.MediatR.Pipeline;
+using MediatR.Examples.Streams;
 using Microsoft.Extensions.DependencyInjection;
 
 

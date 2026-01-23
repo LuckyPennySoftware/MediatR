@@ -2,9 +2,10 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Deluxe.MediatR;
+using Deluxe.MediatR.Pipeline;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
-using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.LightInject;

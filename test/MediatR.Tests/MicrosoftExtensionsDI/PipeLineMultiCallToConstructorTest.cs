@@ -1,8 +1,6 @@
-﻿namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
+﻿using Deluxe.MediatR.MicrosoftExtensionsDI;
 
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
+namespace Deluxe.MediatR.Tests.MicrosoftExtensionsDI;
 
 public class PipelineMultiCallToConstructorTests
 {
