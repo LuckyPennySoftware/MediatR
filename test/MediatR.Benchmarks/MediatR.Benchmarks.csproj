@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <PropertyGroup>
@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.10" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />

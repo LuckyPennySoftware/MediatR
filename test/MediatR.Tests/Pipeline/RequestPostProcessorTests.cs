@@ -5,7 +5,6 @@ namespace MediatR.Tests.Pipeline;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Shouldly;
-using Lamar;
 using Xunit;
 
 public class RequestPostProcessorTests
@@ -41,21 +40,18 @@ public class RequestPostProcessorTests
     [Fact]
     public async Task Should_run_postprocessors()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                scanner.AddAllTypesOf(typeof(IRequestPostProcessor<,>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>()).AsImplementedInterfaces();
             });
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var response = await mediator.Send(new Ping { Message = "Ping" });
 

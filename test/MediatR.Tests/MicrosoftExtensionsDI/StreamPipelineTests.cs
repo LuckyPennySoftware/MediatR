@@ -60,6 +60,7 @@ public class StreamPipelineTests
     {
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddSingleton(output);
         services.AddTransient<IStreamPipelineBehavior<StreamPing, Pong>, OuterBehavior>();
         services.AddTransient<IStreamPipelineBehavior<StreamPing, Pong>, InnerBehavior>();
@@ -91,6 +92,7 @@ public class StreamPipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
+        services.AddFakeLogging();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);

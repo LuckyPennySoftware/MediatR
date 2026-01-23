@@ -17,6 +17,7 @@ public class TypeResolutionTests
     public TypeResolutionTests()
     {
         IServiceCollection services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddSingleton(new Logger());
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(Ping)));
         _provider = services.BuildServiceProvider();
@@ -82,6 +83,7 @@ public class TypeResolutionTests
     public void ShouldHandleKeyedServices()
     {
         IServiceCollection services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddSingleton(new Logger());
         services.AddKeyedSingleton<string>("Foo", "Foo");
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(Ping)));

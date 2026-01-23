@@ -1,9 +1,10 @@
 using System.Threading;
+using MediatR.Registration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Tests.Pipeline.Streams;
 
 using Shouldly;
-using Lamar;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -49,21 +50,17 @@ public class StreamPipelineBehaviorTests
     [Fact]
     public async Task Should_run_pipeline_behavior()
     {
-        var container = new Container(cfg =>
+        var services = new ServiceCollection();
+        services.AddFakeLogging();
+        services.AddMediatR(opts =>
         {
-            cfg.Scan(scanner =>
-            {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Sing>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
-                scanner.AddAllTypesOf(typeof(IStreamPipelineBehavior<,>));
-            });
-            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(SingSongPipelineBehavior));
-            cfg.For<IMediator>().Use<Mediator>();
+            opts.RegisterServicesFromAssemblyContaining<PublishTests>();
+            opts.AddStreamBehavior<SingSongPipelineBehavior>();
         });
-
-        var mediator = container.GetInstance<IMediator>();
+        
+        var container = services.BuildServiceProvider();
+        
+        var mediator = container.GetRequiredService<IMediator>();
 
         var responses = mediator.CreateStream(new Sing { Message = "Sing" });
 

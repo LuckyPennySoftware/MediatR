@@ -19,8 +19,9 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
     <Version>2.0.1</Version>
-    <RootNamespace>MediatR</RootNamespace>
-
+    <PackageId>Deluxe.MediatR.Contracts</PackageId>
+    <AssemblyName>Deluxe.MediatR.Contracts</AssemblyName>
+    <RootNamespace>Deluxe.MediatR</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

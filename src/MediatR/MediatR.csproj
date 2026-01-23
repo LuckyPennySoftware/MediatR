@@ -4,7 +4,7 @@
     <Authors>Jimmy Bogard</Authors>
     <Description>Simple, unambitious mediator implementation in .NET</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <Features>strict</Features>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
@@ -21,6 +21,9 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <PackageId>Deluxe.MediatR</PackageId>
+    <AssemblyName>Deluxe.MediatR</AssemblyName>
+    <RootNamespace>Deluxe.MediatR</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,8 +36,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MediatR.Contracts" Version="[2.0.1, 3.0.0)" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="[10.0.0, )" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[10.0.0, )" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="All" />
   </ItemGroup>

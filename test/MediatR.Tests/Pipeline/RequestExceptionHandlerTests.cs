@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Shouldly;
-using Lamar;
 using Xunit;
 
 public class RequestExceptionHandlerTests
@@ -87,16 +86,16 @@ public class RequestExceptionHandlerTests
     [Fact]
     public async Task Should_run_exception_handler_and_allow_for_exception_not_to_throw()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongExceptionHandler>();
-            cfg.For<IRequestExceptionHandler<Ping, Pong, PingException>>().Use<PingPongExceptionHandlerForType>();
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IRequestHandler<Ping, Pong>, PingHandler>();
+            cfg.AddTransient<IRequestExceptionHandler<Ping, Pong, Exception>, PingPongExceptionHandler>();
+            cfg.AddTransient<IRequestExceptionHandler<Ping, Pong, PingException>, PingPongExceptionHandlerForType>();
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestExceptionProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var response = await mediator.Send(new Ping { Message = "Ping" });
 
@@ -106,15 +105,15 @@ public class RequestExceptionHandlerTests
     [Fact]
     public async Task Should_run_exception_handler_and_allow_for_exception_to_be_still_thrown()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongExceptionHandlerNotHandled>();
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IRequestHandler<Ping, Pong>, PingHandler>();
+            cfg.AddTransient<IRequestExceptionHandler<Ping, Pong, Exception>, PingPongExceptionHandlerNotHandled>();
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestExceptionProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var request = new Ping { Message = "Ping" };
         await Should.ThrowAsync<PingException>(async () =>
@@ -128,15 +127,15 @@ public class RequestExceptionHandlerTests
     [Fact]
     public async Task Should_run_exception_handler_and_unwrap_expections_thrown_in_the_handler()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongThrowingExceptionHandler>();
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IRequestHandler<Ping, Pong>, PingHandler>();
+            cfg.AddTransient<IRequestExceptionHandler<Ping, Pong, Exception>, PingPongThrowingExceptionHandler>();
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestExceptionProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var request = new Ping { Message = "Ping" };
         await Should.ThrowAsync<ApplicationException>(async () =>
@@ -149,15 +148,15 @@ public class RequestExceptionHandlerTests
     public async Task Should_run_matching_exception_handlers_only_once()
     {
         var genericPingExceptionHandler = new GenericPingExceptionHandler();
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
-            cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use(genericPingExceptionHandler);
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IRequestHandler<Ping, Pong>, PingHandler>();
+            cfg.AddSingleton<IRequestExceptionHandler<Ping, Pong, Exception>>(genericPingExceptionHandler);
+            cfg.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestExceptionProcessorBehavior<,>));
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         var request = new Ping { Message = "Ping" };
         await Should.ThrowAsync<PingException>(async () =>

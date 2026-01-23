@@ -14,6 +14,7 @@ public class AssemblyResolutionTests
     public AssemblyResolutionTests()
     {
         IServiceCollection services = new ServiceCollection();
+        services.AddFakeLogging();
         services.AddSingleton(new Logger());
         services.AddMediatR(cfg =>
         {

@@ -8,7 +8,6 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Shouldly;
-using Lamar;
 using Xunit;
 
 public class PublishTests
@@ -54,20 +53,18 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof (INotificationHandler<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<TextWriter>().Use(writer);
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddSingleton<TextWriter>(writer);
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         await mediator.Publish(new Ping { Message = "Ping" });
 
@@ -82,20 +79,18 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof (INotificationHandler<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<TextWriter>().Use(writer);
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddSingleton<TextWriter>(writer);
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         object message = new Ping { Message = "Ping" };
         await mediator.Publish(message);
@@ -141,20 +136,18 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(INotificationHandler<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<TextWriter>().Use(writer);
-            cfg.For<IMediator>().Use<SequentialMediator>();
+            cfg.AddSingleton<TextWriter>(writer);
+            cfg.AddTransient<IMediator, SequentialMediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         await mediator.Publish(new Ping { Message = "Ping" });
 
@@ -170,21 +163,19 @@ public class PublishTests
         var writer = new StringWriter(builder);
         var publisher = new SequentialPublisher();
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(INotificationHandler<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<TextWriter>().Use(writer);
-            cfg.For<INotificationPublisher>().Use(publisher);
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddSingleton<TextWriter>(writer);
+            cfg.AddSingleton<INotificationPublisher>(publisher);
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         await mediator.Publish(new Ping { Message = "Ping" });
 
@@ -200,20 +191,18 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(INotificationHandler<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<TextWriter>().Use(writer);
-            cfg.For<IMediator>().Use<SequentialMediator>();
+            cfg.AddSingleton<TextWriter>(writer);
+            cfg.AddTransient<IMediator, SequentialMediator>();
         });
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         // wrap notifications in an array, so this test won't break on a 'replace with var' refactoring
         var notifications = new INotification[] { new Ping { Message = "Ping" } };
@@ -230,20 +219,18 @@ public class PublishTests
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
 
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof (INotificationHandler<>));
+                scanner.FromAssemblyOf<PublishTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(INotificationHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<TextWriter>().Use(writer);
-            cfg.For<IPublisher>().Use<Mediator>();
+            cfg.AddSingleton<TextWriter>(writer);
+            cfg.AddTransient<IPublisher, Mediator>();
         });
 
-        var mediator = container.GetInstance<IPublisher>();
+        var mediator = container.GetRequiredService<IPublisher>();
 
         await mediator.Publish(new Ping { Message = "Ping" });
 

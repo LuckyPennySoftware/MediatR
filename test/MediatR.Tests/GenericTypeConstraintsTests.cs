@@ -6,7 +6,6 @@ namespace MediatR.Tests;
 using System;
 using System.Linq;
 using Shouldly;
-using Lamar;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -89,21 +88,18 @@ public class GenericTypeConstraintsTests
 
     public GenericTypeConstraintsTests()
     {
-        var container = new Container(cfg =>
+        var container = TestContainer.Create(cfg =>
         {
             cfg.Scan(scanner =>
             {
-                scanner.AssemblyContainingType(typeof(GenericTypeConstraintsTests));
-                scanner.IncludeNamespaceContainingType<Ping>();
-                scanner.IncludeNamespaceContainingType<Jing>();
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                scanner.AddAllTypesOf(typeof(IRequestHandler<>));
+                scanner.FromAssemblyOf<GenericTypeConstraintsTests>()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<,>))).AsImplementedInterfaces()
+                    .AddClasses(t => t.InNamespaceOf<Ping>().AssignableTo(typeof(IRequestHandler<>))).AsImplementedInterfaces();
             });
-            cfg.For<IMediator>().Use<Mediator>();
+            cfg.AddTransient<IMediator, Mediator>();
         });
 
-        _mediator = container.GetInstance<IMediator>();
+        _mediator = container.GetRequiredService<IMediator>();
     }
 
     [Fact]
