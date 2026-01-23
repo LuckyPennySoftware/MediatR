@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6267E2ED-942C-497D-BFC9-B3CE0AFC276F}"
 EndProject
@@ -14,13 +14,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1E133765-6B4E-46C2-8C6C-7238E8EABA79}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		Build.ps1 = Build.ps1
-		BuildContracts.ps1 = BuildContracts.ps1
-		.github\workflows\ci.yml = .github\workflows\ci.yml
 		Directory.Build.props = Directory.Build.props
-		Push.ps1 = Push.ps1
+		Directory.Build.targets = Directory.Build.targets
+		NuGet.Config = NuGet.Config
+		.github\workflows\publish-package.yml = .github\workflows\publish-package.yml
 		README.md = README.md
-		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\sonarqube.yml = .github\workflows\sonarqube.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Benchmarks", "test\MediatR.Benchmarks\MediatR.Benchmarks.csproj", "{1FA62162-F8F1-4CAD-B08E-8DCA603395AD}"

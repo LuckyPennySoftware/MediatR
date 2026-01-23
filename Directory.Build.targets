@@ -1,0 +1,6 @@
+<Project>
+  <!-- netstandard2.0 uses modern C# features (nullable + file-scoped namespaces) -->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+</Project>

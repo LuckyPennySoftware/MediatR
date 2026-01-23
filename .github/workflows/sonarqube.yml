@@ -1,0 +1,49 @@
+name: SonarQube Scan
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    timeout-minutes: 20
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source (full history)
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET Core 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Install SonarScanner
+      run: dotnet tool install dotnet-sonarscanner --tool-path ./.sonar/scanner    
+
+    - name: SonarQube Begin
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin \
+          /k:"deluxe-mediatr" \
+          /d:sonar.host.url="${SONAR_HOST}" \
+          /d:sonar.login="${SONAR_TOKEN}" \
+          /d:sonar.verbose=true
+      env:
+        SONAR_HOST: https://sonarqube.dmlib.de
+        SONAR_TOKEN: ${{ secrets.DELUXE_ORG_SONAR_TOKEN }}
+
+    - name: Build
+      run: dotnet build MediatR.sln -c Release
+
+    - name: SonarQube End
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
+      env:
+        SONAR_TOKEN: ${{ secrets.DELUXE_ORG_SONAR_TOKEN }}

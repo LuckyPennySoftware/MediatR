@@ -1,0 +1,30 @@
+name: Package and Publish MediatR
+
+on: 
+  release:
+    types: [published]
+
+jobs:
+  package-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Prepare release info
+      id: info
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Package and Publish
+      run: |
+        dotnet pack src/Deluxe.MediatR/Deluxe.MediatR.csproj -c Release -p:PackageVersion=${{ steps.info.outputs.VERSION }} -o "./.artifacts"
+        dotnet nuget push "./.artifacts/${PRODUCT_NAME}.${{ steps.info.outputs.VERSION }}.nupkg" --source ${{ env.NUGET_SOURCE }} --api-key $GPR_TOKEN
+      env:
+        PRODUCT_NAME: Deluxe.MediatR
+        NUGET_SOURCE: d3sw
+        GPR_TOKEN: ${{ secrets.GPR_TOKEN }}
