@@ -22,7 +22,7 @@ jobs:
 
     - name: Package and Publish
       run: |
-        dotnet pack src/Deluxe.MediatR/Deluxe.MediatR.csproj -c Release -p:PackageVersion=${{ steps.info.outputs.VERSION }} -o "./.artifacts"
+        dotnet pack src/MediatR/MediatR.csproj -c Release -p:PackageVersion=${{ steps.info.outputs.VERSION }} -o "./.artifacts"
         dotnet nuget push "./.artifacts/${PRODUCT_NAME}.${{ steps.info.outputs.VERSION }}.nupkg" --source ${{ env.NUGET_SOURCE }} --api-key $GPR_TOKEN
       env:
         PRODUCT_NAME: Deluxe.MediatR
