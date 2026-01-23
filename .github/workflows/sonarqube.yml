@@ -40,7 +40,7 @@ jobs:
         SONAR_TOKEN: ${{ secrets.DELUXE_ORG_SONAR_TOKEN }}
 
     - name: Build
-      run: dotnet build MediatR.sln -c Release
+      run: dotnet build MediatR.slnx -c Release
 
     - name: SonarQube End
       run: |
