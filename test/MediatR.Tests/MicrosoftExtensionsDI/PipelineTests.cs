@@ -1067,4 +1067,54 @@ public class PipelineTests
             "Invoked Handler",
         });
     }
+
+    // Types for nested generic response type behavior test
+    public class ListPing : IRequest<List<Pong>> { }
+
+    public class ListPingHandler : IRequestHandler<ListPing, List<Pong>>
+    {
+        private readonly Logger _output;
+        public ListPingHandler(Logger output) => _output = output;
+        public Task<List<Pong>> Handle(ListPing request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.FromResult(new List<Pong> { new() { Message = "Pong" } });
+        }
+    }
+
+    public class ListResponseBehavior<TRequest, TItem>
+        : IPipelineBehavior<TRequest, List<TItem>>
+        where TRequest : IRequest<List<TItem>>
+    {
+        private readonly Logger _output;
+        public ListResponseBehavior(Logger output) => _output = output;
+        public async Task<List<TItem>> Handle(TRequest request, RequestHandlerDelegate<List<TItem>> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Nested behavior before");
+            var result = await next();
+            _output.Messages.Add("Nested behavior after");
+            return result;
+        }
+    }
+
+    [Fact]
+    public async Task Should_apply_open_behavior_with_nested_generic_response_type()
+    {
+        var output = new Logger();
+        IServiceCollection services = new ServiceCollection();
+        services.AddSingleton(output);
+        services.AddFakeLogging();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(PipelineTests).Assembly);
+            cfg.AddOpenBehavior(typeof(ListResponseBehavior<,>));
+        });
+        var provider = services.BuildServiceProvider();
+        var mediator = provider.GetRequiredService<IMediator>();
+
+        var result = await mediator.Send(new ListPing());
+
+        result.ShouldNotBeEmpty();
+        output.Messages.ShouldBe(new[] { "Nested behavior before", "Handler", "Nested behavior after" });
+    }
 }
