@@ -7,6 +7,7 @@ using MediatR.Licensing;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace MediatR.Registration;
 
@@ -470,8 +471,25 @@ public static class ServiceRegistrar
         MediatRServiceCollectionExtensions.LicenseChecked = false;
         
         services.TryAddSingleton(serviceConfiguration);
-        services.TryAddSingleton<LicenseAccessor>();
-        services.TryAddSingleton<LicenseValidator>();
+        services.TryAddSingleton<LicenseAccessor>(static sp =>
+        {
+            var loggerFactory = sp.GetService<ILoggerFactory>()
+                ?? throw new InvalidOperationException(
+                    "MediatR requires ILoggerFactory to be registered. " +
+                    "Call services.AddLogging() before services.AddMediatR().");
+            var config = sp.GetService<MediatRServiceConfiguration>();
+            return config != null
+                ? new LicenseAccessor(config, loggerFactory)
+                : new LicenseAccessor(loggerFactory);
+        });
+        services.TryAddSingleton<LicenseValidator>(static sp =>
+        {
+            var loggerFactory = sp.GetService<ILoggerFactory>()
+                ?? throw new InvalidOperationException(
+                    "MediatR requires ILoggerFactory to be registered. " +
+                    "Call services.AddLogging() before services.AddMediatR().");
+            return new LicenseValidator(loggerFactory);
+        });
 
         var notificationPublisherServiceDescriptor = serviceConfiguration.NotificationPublisherType != null
             ? new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisherType, serviceConfiguration.Lifetime)

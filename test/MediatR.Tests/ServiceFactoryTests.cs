@@ -51,7 +51,10 @@ public class ServiceFactoryTests
         var services = new ServiceCollection();
         services.AddFakeLogging();
         services.AddTransient<IMediator, Mediator>();
-        services.AddSingleton(new MediatRServiceConfiguration());
+        var config = new MediatRServiceConfiguration();
+        services.AddSingleton(config);
+        services.AddSingleton<LicenseAccessor>();
+        services.AddSingleton<LicenseValidator>();
 
         var container = services.BuildServiceProvider();
 
