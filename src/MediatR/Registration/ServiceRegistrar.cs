@@ -417,7 +417,8 @@ public static class ServiceRegistrar
         IEnumerable<Assembly> assemblies, ServiceLifetime lifetime)
     {
         var iface = openBehaviorType.GetInterfaces()
-            .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>));
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>));
+        if (iface == null) return;
 
         var requestPattern  = iface.GetGenericArguments()[0];
         var responsePattern = iface.GetGenericArguments()[1];
