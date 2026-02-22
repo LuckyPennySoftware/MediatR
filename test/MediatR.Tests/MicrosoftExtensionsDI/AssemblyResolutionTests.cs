@@ -3,7 +3,9 @@
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Shouldly;
 using Xunit;
 
@@ -86,5 +88,31 @@ public class AssemblyResolutionTests
     public void ShouldResolveVoidGenericPingRequestHandler()
     {
         _provider.GetService<IRequestHandler<VoidGenericPing<Pong>>>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShouldNotThrowWhenAssemblyThrowsReflectionTypeLoadException()
+    {
+        IServiceCollection services = new ServiceCollection();
+        services.AddFakeLogging();
+        services.AddSingleton(new Logger());
+
+        Action registration = () => services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly, new BrokenAssembly());
+        });
+
+        registration.ShouldNotThrow();
+
+        var provider = services.BuildServiceProvider();
+        provider.GetService<IRequestHandler<Ping, Pong>>().ShouldNotBeNull();
+    }
+
+    private class BrokenAssembly : Assembly
+    {
+        public override IEnumerable<TypeInfo> DefinedTypes =>
+            throw new ReflectionTypeLoadException(
+                new Type?[] { typeof(string), null, typeof(int) },
+                new Exception?[] { null, new Exception("ByRef-like type cannot be loaded"), null });
     }
 }
