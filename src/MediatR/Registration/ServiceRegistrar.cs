@@ -76,7 +76,7 @@ public static class ServiceRegistrar
             var arity = multiOpenInterface.GetGenericArguments().Length;
 
             var concretions = assembliesToScan
-                .SelectMany(a => a.DefinedTypes)
+                .SelectMany(a => a.GetLoadableDefinedTypes())
                 .Where(type => type.FindInterfacesThatClose(multiOpenInterface).Any())
                 .Where(type => type.IsConcrete() && type.IsOpenGeneric())
                 .Where(type => type.GetGenericArguments().Length == arity)
@@ -103,7 +103,7 @@ public static class ServiceRegistrar
         var genericInterfaces = new List<Type>();
 
         var types = assembliesToScan
-            .SelectMany(a => a.DefinedTypes)
+            .SelectMany(a => a.GetLoadableDefinedTypes())
             .Where(t => !t.ContainsGenericParameters || configuration.RegisterGenericHandlers)
             .Where(t => t.IsConcrete() && t.FindInterfacesThatClose(openRequestInterface).Any())
             .Where(configuration.TypeEvaluator)
@@ -233,7 +233,7 @@ public static class ServiceRegistrar
 
         var typesThatCanCloseForEachParameter = constraintsForEachParameter
             .Select(constraints => assembliesToScan
-                .SelectMany(assembly => assembly.GetTypes())
+                .SelectMany(assembly => assembly.GetLoadableDefinedTypes())
                 .Where(type => type.IsClass && !type.IsAbstract && constraints.All(constraint => constraint.IsAssignableFrom(type))).ToList()
             ).ToList();
 
@@ -385,6 +385,18 @@ public static class ServiceRegistrar
         list.Add(value);
     }
 
+    private static IEnumerable<Type> GetLoadableDefinedTypes(this Assembly assembly)
+    {
+        try
+        {
+            return assembly.DefinedTypes;
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            return ex.Types.OfType<Type>();
+        }
+    }
+
     private static bool HasNestedGenericResponseType(Type openBehaviorType)
     {
         var iface = openBehaviorType.GetInterfaces()
@@ -425,7 +437,7 @@ public static class ServiceRegistrar
         var behaviorParams  = openBehaviorType.GetGenericArguments();
 
         var requests = assemblies
-            .SelectMany(a => a.DefinedTypes)
+            .SelectMany(a => a.GetLoadableDefinedTypes())
             .Where(t => t.IsConcrete() && !t.ContainsGenericParameters)
             .SelectMany(t => t.GetInterfaces()
                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>))
