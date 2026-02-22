@@ -389,11 +389,11 @@ public static class ServiceRegistrar
     {
         try
         {
-            return assembly.DefinedTypes.Cast<Type>();
+            return assembly.DefinedTypes;
         }
         catch (ReflectionTypeLoadException ex)
         {
-            return ex.Types.Where(t => t != null).Cast<Type>();
+            return ex.Types.OfType<Type>();
         }
     }
 
