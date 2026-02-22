@@ -62,12 +62,8 @@ public static class MediatRServiceCollectionExtensions
     {
         if (LicenseChecked == false)
         {
-            var licenseAccessor = serviceProvider.GetService<LicenseAccessor>() ?? new LicenseAccessor(
-                serviceProvider.GetRequiredService<MediatRServiceConfiguration>(),
-                serviceProvider.GetRequiredService<ILoggerFactory>()
-            );
-            var licenseValidator = serviceProvider.GetService<LicenseValidator>()
-                                   ?? new LicenseValidator(serviceProvider.GetRequiredService<ILoggerFactory>());
+            var licenseAccessor = serviceProvider.GetRequiredService<LicenseAccessor>();
+            var licenseValidator = serviceProvider.GetRequiredService<LicenseValidator>();
             
             var license = licenseAccessor.Current;
             licenseValidator.Validate(license);
