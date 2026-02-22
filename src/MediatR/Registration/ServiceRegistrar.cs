@@ -471,7 +471,7 @@ public static class ServiceRegistrar
         MediatRServiceCollectionExtensions.LicenseChecked = false;
         
         services.TryAddSingleton(serviceConfiguration);
-        services.TryAddSingleton(static sp =>
+        services.TryAddSingleton<LicenseAccessor>(static sp =>
         {
             var loggerFactory = sp.GetService<ILoggerFactory>()
                 ?? throw new InvalidOperationException(
@@ -482,7 +482,7 @@ public static class ServiceRegistrar
                 ? new LicenseAccessor(config, loggerFactory)
                 : new LicenseAccessor(loggerFactory);
         });
-        services.TryAddSingleton(static sp =>
+        services.TryAddSingleton<LicenseValidator>(static sp =>
         {
             var loggerFactory = sp.GetService<ILoggerFactory>()
                 ?? throw new InvalidOperationException(
