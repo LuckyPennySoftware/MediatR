@@ -153,15 +153,19 @@ public static class ServiceRegistrar
                         // Only register contravariant matches when the handler's notification type is abstract or an interface
                         // This allows INotificationHandler<INotification> to handle all notifications,
                         // but prevents INotificationHandler<ConcreteBase> from automatically handling INotificationHandler<ConcreteDerived>
-                        var shouldRegisterContravariant = implementedInterfaces.Any(i =>
-                        {
-                            var notificationType = i.GenericTypeArguments.FirstOrDefault();
-                            return notificationType != null && (notificationType.IsInterface || notificationType.IsAbstract);
-                        });
+                        var contravariantInterface = implementedInterfaces
+                            .FirstOrDefault(i => @interface.IsAssignableFrom(i));
 
-                        if (shouldRegisterContravariant)
+                        if (contravariantInterface != null)
                         {
-                            services.AddTransient(@interface, type);
+                            var notificationType = contravariantInterface.GenericTypeArguments.FirstOrDefault();
+                            var shouldRegisterContravariant = notificationType != null &&
+                                                              (notificationType.IsInterface || notificationType.IsAbstract);
+
+                            if (shouldRegisterContravariant)
+                            {
+                                services.AddTransient(@interface, type);
+                            }
                         }
                     }
                 }
