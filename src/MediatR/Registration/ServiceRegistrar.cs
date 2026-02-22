@@ -385,6 +385,68 @@ public static class ServiceRegistrar
         list.Add(value);
     }
 
+    private static bool HasNestedGenericResponseType(Type openBehaviorType)
+    {
+        var iface = openBehaviorType.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>));
+        if (iface == null) return false;
+        return iface.GetGenericArguments()[1].IsGenericType;
+    }
+
+    private static bool TryMatchType(Type pattern, Type concrete, Dictionary<Type, Type> bindings)
+    {
+        if (pattern.IsGenericParameter)
+        {
+            if (bindings.TryGetValue(pattern, out var existing)) return existing == concrete;
+            bindings[pattern] = concrete;
+            return true;
+        }
+        if (pattern.IsGenericType && concrete.IsGenericType)
+        {
+            if (pattern.GetGenericTypeDefinition() != concrete.GetGenericTypeDefinition()) return false;
+            var pArgs = pattern.GetGenericArguments();
+            var cArgs = concrete.GetGenericArguments();
+            if (pArgs.Length != cArgs.Length) return false;
+            return pArgs.Zip(cArgs, (p, c) => TryMatchType(p, c, bindings)).All(x => x);
+        }
+        return pattern == concrete;
+    }
+
+    private static void RegisterClosedBehaviorsFromAssemblies(
+        Type openBehaviorType, IServiceCollection services,
+        IEnumerable<Assembly> assemblies, ServiceLifetime lifetime)
+    {
+        var iface = openBehaviorType.GetInterfaces()
+            .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>));
+
+        var requestPattern  = iface.GetGenericArguments()[0];
+        var responsePattern = iface.GetGenericArguments()[1];
+        var behaviorParams  = openBehaviorType.GetGenericArguments();
+
+        var requests = assemblies
+            .SelectMany(a => a.DefinedTypes)
+            .Where(t => t.IsConcrete() && !t.ContainsGenericParameters)
+            .SelectMany(t => t.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>))
+                .Select(i => (RequestType: (Type)t, ResponseType: i.GetGenericArguments()[0])));
+
+        foreach (var (requestType, responseType) in requests)
+        {
+            var bindings = new Dictionary<Type, Type>();
+            if (!TryMatchType(requestPattern,  requestType,  bindings)) continue;
+            if (!TryMatchType(responsePattern, responseType, bindings)) continue;
+            if (!behaviorParams.All(tp => bindings.ContainsKey(tp)))   continue;
+            try
+            {
+                var closingArgs    = behaviorParams.Select(tp => bindings[tp]).ToArray();
+                var closedBehavior = openBehaviorType.MakeGenericType(closingArgs);
+                var closedService  = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, responseType);
+                services.TryAddEnumerable(new ServiceDescriptor(closedService, closedBehavior, lifetime));
+            }
+            catch (Exception) { /* ignore invalid type constructions */ }
+        }
+    }
+
     public static void AddRequiredServices(IServiceCollection services, MediatRServiceConfiguration serviceConfiguration)
     {
         // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overridden
@@ -431,6 +493,21 @@ public static class ServiceRegistrar
         foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
         {
             services.TryAddEnumerable(serviceDescriptor);
+
+            // For open behaviors whose TResponse is a nested generic (e.g. List<T>, Result<T>),
+            // the DI container cannot close them correctly via positional mapping.
+            // Register explicitly-closed versions by scanning assemblies for matching request types.
+            if (serviceDescriptor.ImplementationType != null
+                && serviceDescriptor.ServiceType == typeof(IPipelineBehavior<,>)
+                && serviceDescriptor.ImplementationType.IsOpenGeneric()
+                && HasNestedGenericResponseType(serviceDescriptor.ImplementationType))
+            {
+                RegisterClosedBehaviorsFromAssemblies(
+                    serviceDescriptor.ImplementationType,
+                    services,
+                    serviceConfiguration.AssembliesToRegister,
+                    serviceDescriptor.Lifetime);
+            }
         }
 
         foreach (var serviceDescriptor in serviceConfiguration.StreamBehaviorsToRegister)
