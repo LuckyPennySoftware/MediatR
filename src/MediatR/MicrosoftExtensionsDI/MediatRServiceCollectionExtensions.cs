@@ -66,7 +66,7 @@ public static class MediatRServiceCollectionExtensions
                 serviceProvider.GetRequiredService<MediatRServiceConfiguration>(),
                 serviceProvider.GetRequiredService<ILoggerFactory>()
             );
-            var licenseValidator = serviceProvider.GetService<LicenseValidator>() 
+            var licenseValidator = serviceProvider.GetService<LicenseValidator>()
                                    ?? new LicenseValidator(serviceProvider.GetRequiredService<ILoggerFactory>());
             
             var license = licenseAccessor.Current;
