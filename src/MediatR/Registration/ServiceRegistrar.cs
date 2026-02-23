@@ -108,7 +108,7 @@ public static class ServiceRegistrar
             .Where(t => !t.ContainsGenericParameters || configuration.RegisterGenericHandlers)
             .Where(t => t.IsConcrete() && t.FindInterfacesThatClose(openRequestInterface).Any())
             .Where(configuration.TypeEvaluator)
-            .ToList();        
+            .ToList();
 
         foreach (var type in types)
         {
