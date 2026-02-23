@@ -32,6 +32,7 @@ internal class LicenseValidator
 
         _logger.LogDebug("The Lucky Penny license key details: {license}", license);
 
+        var isPerpetualFallback = false;
         var diff = DateTime.UtcNow.Date.Subtract(license.ExpirationDate!.Value.Date).TotalDays;
         if (diff > 0)
         {
@@ -41,10 +42,10 @@ internal class LicenseValidator
                 var buildDateDiff = _buildDate.Value.Date.Subtract(license.ExpirationDate.Value.Date).TotalDays;
                 if (buildDateDiff <= 0)
                 {
+                    isPerpetualFallback = true;
                     _logger.LogInformation(
                         "Your license for the Lucky Penny software MediatR expired {expiredDaysAgo} days ago, but perpetual licensing is active because the build date ({buildDate:O}) is before the license expiration date ({licenseExpiration:O}).",
                         diff, _buildDate, license.ExpirationDate);
-                    // Don't add to errors - perpetual fallback applies
                 }
                 else
                 {
@@ -73,7 +74,7 @@ internal class LicenseValidator
             _logger.LogError(
                 "Please visit https://luckypennysoftware.com to obtain a valid license for the Lucky Penny software MediatR.");
         }
-        else
+        else if (!isPerpetualFallback)
         {
             _logger.LogInformation("You have a valid license key for the Lucky Penny software {type} {edition} edition. The license expires on {licenseExpiration}.",
                 license.ProductType,

@@ -142,6 +142,8 @@ public class LicenseValidatorTests
         logMessages.ShouldNotContain(log => log.Level == LogLevel.Error);
         logMessages.ShouldContain(log => log.Level == LogLevel.Information &&
                                          log.Message.Contains("perpetual"));
+        logMessages.ShouldNotContain(log => log.Level == LogLevel.Information &&
+                                            log.Message.Contains("expires on"));
     }
 
     [Fact]
