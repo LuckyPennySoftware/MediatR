@@ -151,14 +151,14 @@ public class LicenseValidatorTests
         var provider = new FakeLoggerProvider();
         factory.AddProvider(provider);
 
-        var buildDate = DateTimeOffset.UtcNow.AddDays(30); // Build date in future (after expiration)
+        var buildDate = DateTimeOffset.UtcNow.AddDays(-5); // Build date in past, after expiration
         var licenseValidator = new LicenseValidator(factory, buildDate);
         var license = new License(
             new Claim("account_id", Guid.NewGuid().ToString()),
             new Claim("customer_id", Guid.NewGuid().ToString()),
             new Claim("sub_id", Guid.NewGuid().ToString()),
             new Claim("iat", DateTimeOffset.UtcNow.AddYears(-1).ToUnixTimeSeconds().ToString()),
-            new Claim("exp", DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds().ToString()),
+            new Claim("exp", DateTimeOffset.UtcNow.AddDays(-10).ToUnixTimeSeconds().ToString()),
             new Claim("edition", nameof(Edition.Professional)),
             new Claim("type", nameof(ProductType.MediatR)),
             new Claim("perpetual", "true"));
