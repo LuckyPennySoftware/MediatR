@@ -7,9 +7,17 @@ namespace MediatR.Licensing;
 internal class LicenseValidator
 {
     private readonly ILogger _logger;
+    private readonly DateTimeOffset? _buildDate;
 
-    public LicenseValidator(ILoggerFactory loggerFactory)
-        => _logger = loggerFactory.CreateLogger("LuckyPennySoftware.MediatR.License");
+    public LicenseValidator(ILoggerFactory loggerFactory) : this(loggerFactory, BuildInfo.BuildDate)
+    {
+    }
+
+    public LicenseValidator(ILoggerFactory loggerFactory, DateTimeOffset? buildDate)
+    {
+        _logger = loggerFactory.CreateLogger("LuckyPennySoftware.MediatR.License");
+        _buildDate = buildDate;
+    }
 
     public void Validate(License license)
     {
@@ -31,7 +39,31 @@ internal class LicenseValidator
         var diff = DateTime.UtcNow.Date.Subtract(license.ExpirationDate!.Value.Date).TotalDays;
         if (diff > 0)
         {
-            errors.Add($"Your license for the Lucky Penny software MediatR expired {diff} days ago.");
+            // If perpetual, check if build date is before expiration
+            if (license.IsPerpetual && _buildDate.HasValue)
+            {
+                var buildDateDiff = _buildDate.Value.Date.Subtract(license.ExpirationDate.Value.Date).TotalDays;
+                if (buildDateDiff <= 0)
+                {
+                    _logger.LogInformation(
+                        "Your license for the Lucky Penny software MediatR expired {expiredDaysAgo} days ago, but perpetual licensing is active because the build date ({buildDate:O}) is before the license expiration date ({licenseExpiration:O}).",
+                        diff, _buildDate, license.ExpirationDate);
+                    // Don't add to errors - perpetual fallback applies
+                }
+                else
+                {
+                    errors.Add($"Your license for the Lucky Penny software MediatR expired {diff} days ago.");
+                }
+            }
+            else
+            {
+                if (license.IsPerpetual)
+                {
+                    _logger.LogWarning(
+                        "Your license for the Lucky Penny software MediatR has perpetual licensing enabled, but the build date could not be determined. Perpetual licensing cannot be applied. Please ensure the assembly metadata is correctly embedded at build time.");
+                }
+                errors.Add($"Your license for the Lucky Penny software MediatR expired {diff} days ago.");
+            }
         }
 
         if (license.ProductType!.Value != ProductType.MediatR
