@@ -34,6 +34,24 @@ jobs:
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh
+    - name: Get package version
+      id: version
+      shell: pwsh
+      run: |
+        $pkg = Get-ChildItem ./artifacts -Filter "MediatR.*.nupkg" | Select-Object -First 1
+        $version = $pkg.BaseName -replace '^MediatR\.', ''
+        "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+    - name: Generate SBOM
+      shell: pwsh
+      run: |
+        dotnet tool install --global Microsoft.Sbom.DotNetTool
+        sbom-tool generate `
+          -b ./artifacts `
+          -bc ./src/MediatR `
+          -pn MediatR `
+          -pv ${{ steps.version.outputs.version }} `
+          -ps "Lucky Penny Software LLC" `
+          -nsb https://mediatr.io
     - name: Push to MyGet
       if: github.ref == 'refs/heads/main'
       env:
