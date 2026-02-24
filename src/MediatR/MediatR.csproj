@@ -30,10 +30,7 @@
   </PropertyGroup>
 
   <Target Name="EmbedBuildDate" BeforeTargets="CoreCompile">
-    <Exec Condition=" '$(OS)' == 'Windows_NT' " Command="git log -1 --format=%%cI" ConsoleToMSBuild="true" IgnoreExitCode="true">
-      <Output TaskParameter="ConsoleOutput" PropertyName="BuildDateUtc" />
-    </Exec>
-    <Exec Condition=" '$(OS)' != 'Windows_NT' " Command="git log -1 --format=%cI" ConsoleToMSBuild="true" IgnoreExitCode="true">
+    <Exec Command="git log -1 --format=%25cI" ConsoleToMSBuild="true" IgnoreExitCode="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="BuildDateUtc" />
     </Exec>
     <PropertyGroup>
