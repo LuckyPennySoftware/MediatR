@@ -44,7 +44,7 @@ internal class License
         }
 
         var perpetualValue = claims.FindFirst("perpetual")?.Value;
-        IsPerpetual = perpetualValue is "true" or "1";
+        IsPerpetual = perpetualValue?.ToLowerInvariant() is "true" or "1";
 
         IsConfigured = AccountId != null
                        && CustomerId != null

@@ -229,6 +229,7 @@ public class LicenseValidatorTests
         logMessages.ShouldContain(log => log.Level == LogLevel.Warning && log.Message.Contains("perpetual"));
         logMessages.ShouldContain(log => log.Level == LogLevel.Error);
     }
+    
     [Fact(Skip = "Needs license")]
     public void Should_return_valid_for_actual_valid_license()
     {
