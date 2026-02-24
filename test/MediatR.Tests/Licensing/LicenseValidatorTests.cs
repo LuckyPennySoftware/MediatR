@@ -201,6 +201,33 @@ public class LicenseValidatorTests
                                             || log.Level == LogLevel.Critical);
     }
 
+    [Fact]
+    public void Should_fall_back_to_expiration_error_when_perpetual_and_build_date_is_null()
+    {
+        var factory = new LoggerFactory();
+        var provider = new FakeLoggerProvider();
+        factory.AddProvider(provider);
+
+        var licenseValidator = new LicenseValidator(factory);
+        var license = new License(
+            new Claim("account_id", Guid.NewGuid().ToString()),
+            new Claim("customer_id", Guid.NewGuid().ToString()),
+            new Claim("sub_id", Guid.NewGuid().ToString()),
+            new Claim("iat", DateTimeOffset.UtcNow.AddDays(-10).ToUnixTimeSeconds().ToString()),
+            new Claim("exp", DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds().ToString()),
+            new Claim("edition", nameof(Edition.Community)),
+            new Claim("type", nameof(ProductType.Bundle)),
+            new Claim("perpetual", bool.TrueString));
+
+        license.IsConfigured.ShouldBeTrue();
+        license.IsPerpetual.ShouldBeTrue();
+
+        // Pass a null buildDate for a perpetual, but expired, license.
+        licenseValidator.Validate(license, null);
+
+        var logMessages = provider.Collector.GetSnapshot();
+        logMessages.ShouldContain(log => log.Level == LogLevel.Error);
+    }
     [Fact(Skip = "Needs license")]
     public void Should_return_valid_for_actual_valid_license()
     {
