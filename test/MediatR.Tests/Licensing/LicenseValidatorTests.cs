@@ -208,7 +208,7 @@ public class LicenseValidatorTests
         var provider = new FakeLoggerProvider();
         factory.AddProvider(provider);
 
-        var licenseValidator = new LicenseValidator(factory);
+        var licenseValidator = new LicenseValidator(factory, (DateTimeOffset?)null);
         var license = new License(
             new Claim("account_id", Guid.NewGuid().ToString()),
             new Claim("customer_id", Guid.NewGuid().ToString()),
@@ -217,15 +217,16 @@ public class LicenseValidatorTests
             new Claim("exp", DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds().ToString()),
             new Claim("edition", nameof(Edition.Community)),
             new Claim("type", nameof(ProductType.Bundle)),
-            new Claim("perpetual", bool.TrueString));
+            new Claim("perpetual", "true"));
 
         license.IsConfigured.ShouldBeTrue();
         license.IsPerpetual.ShouldBeTrue();
 
-        // Pass a null buildDate for a perpetual, but expired, license.
-        licenseValidator.Validate(license, null);
+        // Validator was created with null buildDate - perpetual licensing cannot be applied.
+        licenseValidator.Validate(license);
 
         var logMessages = provider.Collector.GetSnapshot();
+        logMessages.ShouldContain(log => log.Level == LogLevel.Warning && log.Message.Contains("perpetual"));
         logMessages.ShouldContain(log => log.Level == LogLevel.Error);
     }
     [Fact(Skip = "Needs license")]
