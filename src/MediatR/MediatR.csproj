@@ -30,8 +30,14 @@
   </PropertyGroup>
 
   <Target Name="EmbedBuildDate" BeforeTargets="CoreCompile">
+    <Exec Condition=" '$(OS)' == 'Windows_NT' " Command="git log -1 --format=%%cI" ConsoleToMSBuild="true" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="BuildDateUtc" />
+    </Exec>
+    <Exec Condition=" '$(OS)' != 'Windows_NT' " Command="git log -1 --format=%cI" ConsoleToMSBuild="true" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="BuildDateUtc" />
+    </Exec>
     <PropertyGroup>
-      <BuildDateUtc>$([System.DateTime]::UtcNow.ToString("O"))</BuildDateUtc>
+      <BuildDateUtc Condition="'$(BuildDateUtc)' == ''">$([System.DateTime]::UtcNow.ToString("O"))</BuildDateUtc>
     </PropertyGroup>
     <WriteLinesToFile File="$(IntermediateOutputPath)BuildDateGenerated.cs" Lines="[assembly: System.Reflection.AssemblyMetadata(&quot;BuildDateUtc&quot;, &quot;$(BuildDateUtc)&quot;)]" Overwrite="true" />
     <ItemGroup>
