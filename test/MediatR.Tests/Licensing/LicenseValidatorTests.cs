@@ -223,11 +223,12 @@ public class LicenseValidatorTests
         license.IsPerpetual.ShouldBeTrue();
 
         // Pass a null buildDate for a perpetual, but expired, license.
-        licenseValidator.Validate(license, null);
+        licenseValidator.Validate(license);
 
         var logMessages = provider.Collector.GetSnapshot();
         logMessages.ShouldContain(log => log.Level == LogLevel.Error);
     }
+    
     [Fact(Skip = "Needs license")]
     public void Should_return_valid_for_actual_valid_license()
     {
