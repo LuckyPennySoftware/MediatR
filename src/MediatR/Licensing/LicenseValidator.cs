@@ -9,10 +9,14 @@ internal class LicenseValidator
     private readonly ILogger _logger;
     private readonly DateTimeOffset? _buildDate;
 
-    public LicenseValidator(ILoggerFactory loggerFactory, DateTimeOffset? buildDate = null)
+    public LicenseValidator(ILoggerFactory loggerFactory) : this(loggerFactory, BuildInfo.BuildDate)
+    {
+    }
+
+    public LicenseValidator(ILoggerFactory loggerFactory, DateTimeOffset? buildDate)
     {
         _logger = loggerFactory.CreateLogger("LuckyPennySoftware.MediatR.License");
-        _buildDate = buildDate ?? BuildInfo.BuildDate;
+        _buildDate = buildDate;
     }
 
     public void Validate(License license)
@@ -53,6 +57,11 @@ internal class LicenseValidator
             }
             else
             {
+                if (license.IsPerpetual)
+                {
+                    _logger.LogWarning(
+                        "Your license for the Lucky Penny software MediatR has perpetual licensing enabled, but the build date could not be determined. Perpetual licensing cannot be applied. Please ensure the assembly metadata is correctly embedded at build time.");
+                }
                 errors.Add($"Your license for the Lucky Penny software MediatR expired {diff} days ago.");
             }
         }
