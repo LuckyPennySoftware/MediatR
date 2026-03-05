@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
@@ -80,7 +81,7 @@ internal class LicenseAccessor
             ValidateLifetime = false
         };
 
-        var validateResult = handler.ValidateTokenAsync(licenseKey, parms).Result;
+        var validateResult = Task.Run(() => handler.ValidateTokenAsync(licenseKey, parms)).GetAwaiter().GetResult();
         if (!validateResult.IsValid)
         {
             _logger.LogCritical(validateResult.Exception, "Error validating the Lucky Penny software license key");
