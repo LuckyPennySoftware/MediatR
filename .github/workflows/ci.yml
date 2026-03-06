@@ -36,11 +36,11 @@ jobs:
       run: ./Build.ps1
       shell: pwsh
     - name: Report Test Results
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v1.9.1
       if: success() || failure()
       with:
         name: Test Results (Windows)
-        path: artifacts/**/*.trx
+        path: '**/TestResults/**/*.trx'
         reporter: dotnet-trx
     - name: Get package version
       id: version
