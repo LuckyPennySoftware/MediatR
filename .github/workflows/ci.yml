@@ -13,6 +13,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  checks: write
 jobs:
   build:
     runs-on: windows-latest
@@ -34,6 +35,13 @@ jobs:
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh
+    - name: Report Test Results
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Test Results (Windows)
+        path: artifacts/**/*.trx
+        reporter: dotnet-trx
     - name: Get package version
       id: version
       shell: pwsh
