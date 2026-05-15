@@ -10,7 +10,7 @@ env:
   MINVERBUILDMETADATA: build.${{ github.run_id }}.${{ github.run_attempt}}
 permissions:
   id-token: write
-  contents: read
+  contents: write
   checks: write
 jobs:
   build:
@@ -84,6 +84,17 @@ jobs:
         NUGET_URL: https://api.nuget.org/v3/index.json
         NUGET_API_KEY: ${{ secrets.MEDIATR_NUGET_API_KEY }}
       run: ./Push.ps1
+      shell: pwsh
+    - name: Attach assets to GitHub Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $assets = @()
+        $assets += Get-ChildItem ./artifacts -Filter *.nupkg | ForEach-Object { $_.FullName }
+        $assets += Get-ChildItem ./artifacts -Filter *.snupkg | ForEach-Object { $_.FullName }
+        $assets += './artifacts/_manifest/spdx_2.2/manifest.spdx.json'
+        $assets += './artifacts/_manifest/spdx_2.2/manifest.spdx.json.sha256'
+        gh release upload ${{ github.ref_name }} $assets --clobber
       shell: pwsh
     - name: Artifacts
       uses: actions/upload-artifact@v4
