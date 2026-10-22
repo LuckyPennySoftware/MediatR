@@ -74,7 +74,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[10.0.0, )" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[10.0.0, )" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="[8.14.0, )" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.402" PrivateAssets="All" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="All" />
   </ItemGroup>
   
