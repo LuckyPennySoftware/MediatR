@@ -30,9 +30,19 @@
   </PropertyGroup>
 
   <Target Name="EmbedBuildDate" BeforeTargets="CoreCompile">
-    <Exec Command="git log -1 --format=%25cI" ConsoleToMSBuild="true" IgnoreExitCode="true">
-      <Output TaskParameter="ConsoleOutput" PropertyName="BuildDateUtc" />
+    <PropertyGroup>
+      <!-- On Windows, Exec runs the command from a .cmd file, where a single % is consumed by batch variable expansion -->
+      <GitCommitDateFormat Condition="'$(OS)' == 'Windows_NT'">%25%25cI</GitCommitDateFormat>
+      <GitCommitDateFormat Condition="'$(OS)' != 'Windows_NT'">%25cI</GitCommitDateFormat>
+    </PropertyGroup>
+    <Exec Command="git log -1 --format=$(GitCommitDateFormat)" ConsoleToMSBuild="true" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitDate" />
+      <Output TaskParameter="ExitCode" PropertyName="GitCommitDateExitCode" />
     </Exec>
+    <PropertyGroup>
+      <BuildDateUtc Condition="'$(GitCommitDateExitCode)' == '0' And $([System.Text.RegularExpressions.Regex]::IsMatch('$(GitCommitDate)', '^\d{4}-\d{2}-\d{2}T'))">$(GitCommitDate)</BuildDateUtc>
+    </PropertyGroup>
+    <Message Importance="high" Condition="'$(BuildDateUtc)' == ''" Text="Could not determine the git commit date (git output: '$(GitCommitDate)'). Falling back to the current time for BuildDateUtc." />
     <PropertyGroup>
       <BuildDateUtc Condition="'$(BuildDateUtc)' == ''">$([System.DateTime]::UtcNow.ToString("O"))</BuildDateUtc>
     </PropertyGroup>
