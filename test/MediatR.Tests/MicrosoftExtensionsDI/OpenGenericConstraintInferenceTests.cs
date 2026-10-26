@@ -361,8 +361,14 @@ public class OpenGenericConstraintInferenceTests
     public interface ISlot8<T> { }
     public interface ISlot9<T> { }
     public interface ISlot10<T> { }
+    public interface ISlot11<T> { }
+    public interface ISlot12<T> { }
+    public interface ISlot13<T> { }
+    public interface ISlot14<T> { }
+    public interface ISlot15<T> { }
+    public interface ISlot16<T> { }
 
-    public class SlotCommand : IRequest, ISlot1<int>, ISlot2<int>, ISlot3<int>, ISlot4<int>, ISlot5<int>, ISlot6<int>, ISlot7<int>, ISlot8<int>, ISlot9<int>, ISlot10<int> { }
+    public class SlotCommand : IRequest, ISlot1<int>, ISlot2<int>, ISlot3<int>, ISlot4<int>, ISlot5<int>, ISlot6<int>, ISlot7<int>, ISlot8<int>, ISlot9<int>, ISlot10<int>, ISlot11<int>, ISlot12<int>, ISlot13<int>, ISlot14<int>, ISlot15<int>, ISlot16<int> { }
 
     public class SlotCommandHandler : IRequestHandler<SlotCommand>
     {
@@ -375,8 +381,8 @@ public class OpenGenericConstraintInferenceTests
         }
     }
 
-    public class ManySlotBehavior<TRequest, TResponse, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : ISlot1<T1>, ISlot2<T2>, ISlot3<T3>, ISlot4<T4>, ISlot5<T5>, ISlot6<T6>, ISlot7<T7>, ISlot8<T8>, ISlot9<T9>, ISlot10<T10>
+    public class ManySlotBehavior<TRequest, TResponse, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : ISlot1<T1>, ISlot2<T2>, ISlot3<T3>, ISlot4<T4>, ISlot5<T5>, ISlot6<T6>, ISlot7<T7>, ISlot8<T8>, ISlot9<T9>, ISlot10<T10>, ISlot11<T11>, ISlot12<T12>, ISlot13<T13>, ISlot14<T14>, ISlot15<T15>, ISlot16<T16>
     {
         private readonly Logger _output;
         public ManySlotBehavior(Logger output) => _output = output;
@@ -400,15 +406,93 @@ public class OpenGenericConstraintInferenceTests
     [Fact]
     public async Task Should_infer_many_independent_type_parameters_without_exploring_every_ordering()
     {
-        // Exploring every ordering of the 10 constraint links visits 10! = 3,628,800 paths per matching request;
-        // pruning repeated binding states visits at most 2^10 = 1,024
+        // Exploring the 16 constraint links one at a time visits every ordering (16!) or, with pruning, every subset (2^16);
+        // collecting candidates from all links before branching needs a single pass
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(ManySlotBehavior<,,,,,,,,,,,>)));
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(ManySlotBehavior<,,,,,,,,,,,,,,,,,>)));
         stopwatch.Stop();
 
         await mediator.Send(new SlotCommand());
 
         output.Messages.ShouldBe(new[] { "Slot behavior", "Handler" });
-        stopwatch.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(5));
+        stopwatch.Elapsed.ShouldBeLessThan(TimeSpan.FromMilliseconds(500));
+    }
+
+    // Unknown parameters inferred across different constraints, and nested constraint arguments under variance
+
+    public interface IPairFor<out TLeft, out TRight> { }
+    public class CrossLinkResponse : IPairFor<DerivedThing, BaseThing> { }
+    public class CrossLinkRequest : IRequest<CrossLinkResponse>, IPairFor<BaseThing, DerivedThing> { }
+
+    public class CrossLinkRequestHandler : IRequestHandler<CrossLinkRequest, CrossLinkResponse>
+    {
+        private readonly Logger _output;
+        public CrossLinkRequestHandler(Logger output) => _output = output;
+        public Task<CrossLinkResponse> Handle(CrossLinkRequest request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.FromResult(new CrossLinkResponse());
+        }
+    }
+
+    // Each constraint alone infers (BaseThing, DerivedThing) or (DerivedThing, BaseThing), and neither satisfies both;
+    // only combining candidates across constraints finds (BaseThing, BaseThing)
+    public class CrossLinkBehavior<TRequest, TResponse, TLeft, TRight> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IPairFor<TLeft, TRight>
+        where TResponse : IPairFor<TLeft, TRight>
+    {
+        private readonly Logger _output;
+        public CrossLinkBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Cross-link behavior {typeof(TLeft).Name},{typeof(TRight).Name}");
+            return next();
+        }
+    }
+
+    public interface ICovariantMarker<out T> { }
+    public class NestedVarianceCommand : IRequest, ICovariantMarker<List<int>> { }
+
+    public class NestedVarianceCommandHandler : IRequestHandler<NestedVarianceCommand>
+    {
+        private readonly Logger _output;
+        public NestedVarianceCommandHandler(Logger output) => _output = output;
+        public Task Handle(NestedVarianceCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class NestedVarianceBehavior<TRequest, TResponse, TItem> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : ICovariantMarker<IEnumerable<TItem>>
+    {
+        private readonly Logger _output;
+        public NestedVarianceBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Nested variance behavior {typeof(TItem).Name}");
+            return next();
+        }
+    }
+
+    [Fact]
+    public async Task Should_combine_candidates_across_constraints_when_inferring_several_type_parameters()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(CrossLinkBehavior<,,,>)));
+
+        await mediator.Send(new CrossLinkRequest());
+
+        output.Messages.ShouldBe(new[] { "Cross-link behavior BaseThing,BaseThing", "Handler" });
+    }
+
+    [Fact]
+    public async Task Should_infer_nested_constraint_argument_through_implemented_interfaces_under_variance()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(NestedVarianceBehavior<,,>)));
+
+        await mediator.Send(new NestedVarianceCommand());
+
+        output.Messages.ShouldBe(new[] { "Nested variance behavior Int32", "Handler" });
     }
 }

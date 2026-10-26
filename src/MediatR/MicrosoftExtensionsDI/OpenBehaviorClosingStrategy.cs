@@ -15,10 +15,11 @@ public enum OpenBehaviorClosingStrategy
 
     /// <summary>
     /// MediatR registers only the open generic and leaves closing to the container when each request is resolved.
-    /// Use this with containers that close open generics by matching the service type (such as DryIoc and LightInject)
-    /// when requests come from assemblies that aren't scanned. The Microsoft container closes open generics positionally,
-    /// so it skips or fails on these behaviors.
-    /// Implementations with more type parameters than the service interface can't be closed by any container,
+    /// Use this with containers that close open generics by matching the service type (such as DryIoc, LightInject or Autofac)
+    /// when requests come from assemblies that aren't scanned. The Microsoft and Stashbox containers close open generics
+    /// positionally: they skip or fail on these behaviors, and reject an open generic whose number of type parameters differs
+    /// from the service interface when the service provider is built.
+    /// Implementations with a type parameter that only appears in a constraint can't be closed by any container,
     /// so they are still closed for scanned requests.
     /// </summary>
     CloseInContainer

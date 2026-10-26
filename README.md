@@ -103,7 +103,7 @@ public class TransactionBehavior<TRequest, TResponse, TDbContext> : IPipelineBeh
 
 By default, MediatR closes these itself: it scans the registered assemblies for matching request types and registers a closed behavior for each one, filling extra type parameters from the constraints. Requests outside the scanned assemblies don't get the behavior.
 
-If you use a container that closes open generics by matching the service type, such as DryIoc or LightInject, and your requests come from assemblies that aren't scanned, you can leave closing to the container instead:
+If you use a container that closes open generics by matching the service type, such as DryIoc, LightInject or Autofac, and your requests come from assemblies that aren't scanned, you can leave closing to the container instead. Don't use this with the Microsoft or Stashbox containers: they close open generics positionally, and reject an open generic with a different number of type parameters than the interface when the service provider is built.
 
 ```csharp
 services.AddMediatR(cfg => {
@@ -113,7 +113,7 @@ services.AddMediatR(cfg => {
     });
 ```
 
-Behaviors with more type parameters than the interface, like `TransactionBehavior<,,>`, can't be closed by any container and are always closed from scanned requests.
+Behaviors with a type parameter that only appears in a constraint, like `TDbContext` in `TransactionBehavior<,,>`, can't be closed by any container and are always closed from scanned requests.
 
 ### Setting the license key
 

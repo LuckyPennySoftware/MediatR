@@ -1,9 +1,10 @@
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
+using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Stashbox;
 
@@ -109,7 +110,45 @@ public class OpenBehaviorClosingStrategyTests
         }
     }
 
-    private static IServiceCollection CreateServices(Type openBehaviorType, OpenBehaviorClosingStrategy? strategy = null)
+    public class NestedListPostProcessor<TRequest, TItem>(Log log) : IRequestPostProcessor<TRequest, List<TItem>>
+        where TRequest : IRequest<List<TItem>>
+    {
+        public Task Process(TRequest request, List<TItem> response, CancellationToken cancellationToken)
+        {
+            log.Messages.Add("Nested post-processor");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class GenericTuplePing<TLeft, TRight> : IRequest<Tuple<TLeft, TRight>> { }
+    public class GenericVoidPing<T> : IRequest { }
+
+    // Every parameter appears in the service interface, so a unifying container can close these
+    // even though their arity differs from IPipelineBehavior<TRequest, TResponse>
+    public class TupleBehavior<TRequest, TLeft, TRight>(Log log) : IPipelineBehavior<TRequest, Tuple<TLeft, TRight>>
+        where TRequest : IRequest<Tuple<TLeft, TRight>>
+    {
+        public async Task<Tuple<TLeft, TRight>> Handle(TRequest request, RequestHandlerDelegate<Tuple<TLeft, TRight>> next, CancellationToken cancellationToken)
+        {
+            log.Messages.Add("Tuple behavior");
+            return await next();
+        }
+    }
+
+    public class UnitBehavior<TRequest>(Log log) : IPipelineBehavior<TRequest, Unit>
+        where TRequest : IRequest
+    {
+        public async Task<Unit> Handle(TRequest request, RequestHandlerDelegate<Unit> next, CancellationToken cancellationToken)
+        {
+            log.Messages.Add("Unit behavior");
+            return await next();
+        }
+    }
+
+    private static IServiceCollection CreateServices(Type openBehaviorType, OpenBehaviorClosingStrategy? strategy = null) =>
+        CreateServices(cfg => cfg.AddOpenBehavior(openBehaviorType), strategy);
+
+    private static IServiceCollection CreateServices(Action<MediatRServiceConfiguration> configure, OpenBehaviorClosingStrategy? strategy = null)
     {
         IServiceCollection services = new ServiceCollection();
         services.AddFakeLogging();
@@ -118,7 +157,7 @@ public class OpenBehaviorClosingStrategyTests
         {
             cfg.RegisterServicesFromAssemblyContaining<OpenBehaviorClosingStrategyTests>();
             if (strategy != null) cfg.OpenBehaviorClosingStrategy = strategy.Value;
-            cfg.AddOpenBehavior(openBehaviorType);
+            configure(cfg);
         });
         return services;
     }
@@ -197,5 +236,54 @@ public class OpenBehaviorClosingStrategyTests
         await provider.GetRequiredService<IMediator>().Send(new ClosingTxCommand(provider.GetRequiredService<Log>()));
 
         provider.GetRequiredService<Log>().Messages.ShouldBe(["Tx behavior ClosingDbContext", "Handler"]);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllContainers))]
+    public async Task Should_apply_auto_registered_nested_generic_processor_once_when_also_added_explicitly(string container)
+    {
+        var provider = Containers[container](CreateServices(cfg =>
+        {
+            cfg.AutoRegisterRequestProcessors = true;
+            cfg.AddOpenRequestPostProcessor(typeof(NestedListPostProcessor<,>));
+        }));
+
+        await provider.GetRequiredService<IMediator>().Send(new ClosingListPing(provider.GetRequiredService<Log>()));
+
+        provider.GetRequiredService<Log>().Messages.ShouldBe(["Handler", "Nested post-processor"]);
+    }
+
+    [Theory]
+    [InlineData(typeof(TupleBehavior<,,>))]
+    [InlineData(typeof(UnitBehavior<>))]
+    public void Should_register_only_the_open_generic_when_closing_in_container_with_different_arity(Type openBehaviorType)
+    {
+        var services = CreateServices(openBehaviorType, OpenBehaviorClosingStrategy.CloseInContainer);
+
+        services.Where(d => d.ImplementationType is { IsGenericType: true } t && t.GetGenericTypeDefinition() == openBehaviorType)
+            .ShouldHaveSingleItem()
+            .ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
+    }
+
+    [Theory]
+    [MemberData(nameof(UnifyingContainerNames))]
+    public void Should_apply_higher_arity_behavior_to_unscanned_requests_when_closing_in_container(string container)
+    {
+        var provider = Containers[container](CreateServices(typeof(TupleBehavior<,,>), OpenBehaviorClosingStrategy.CloseInContainer));
+
+        provider.GetServices<IPipelineBehavior<GenericTuplePing<Pong, string>, Tuple<Pong, string>>>()
+            .OfType<TupleBehavior<GenericTuplePing<Pong, string>, Pong, string>>()
+            .ShouldHaveSingleItem();
+    }
+
+    [Theory]
+    [MemberData(nameof(UnifyingContainerNames))]
+    public void Should_apply_lower_arity_behavior_to_unscanned_requests_when_closing_in_container(string container)
+    {
+        var provider = Containers[container](CreateServices(typeof(UnitBehavior<>), OpenBehaviorClosingStrategy.CloseInContainer));
+
+        provider.GetServices<IPipelineBehavior<GenericVoidPing<Pong>, Unit>>()
+            .OfType<UnitBehavior<GenericVoidPing<Pong>>>()
+            .ShouldHaveSingleItem();
     }
 }
