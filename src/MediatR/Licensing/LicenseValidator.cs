@@ -6,6 +6,9 @@ namespace MediatR.Licensing;
 
 internal class LicenseValidator
 {
+    // Grace period for keys issued without a term_end claim, measured from their exp (their term end).
+    internal const int DefaultGracePeriodDays = 30;
+
     private readonly ILogger _logger;
     private readonly DateTimeOffset? _buildDate;
 
@@ -36,23 +39,48 @@ internal class LicenseValidator
 
         _logger.LogDebug("The Lucky Penny license key details: {license}", license);
 
-        var diff = DateTime.UtcNow.Date.Subtract(license.ExpirationDate!.Value.Date).TotalDays;
+        var today = DateTime.UtcNow.Date;
+        // Keys without a term_end claim predate the grace period: their exp is the term end, so the grace
+        // runs from there. Keys with one carry the grace in exp itself (term end + grace).
+        var termEnd = (license.TermEndDate ?? license.ExpirationDate!.Value).Date;
+        var graceEnd = license.TermEndDate.HasValue
+            ? license.ExpirationDate!.Value.Date
+            : termEnd.AddDays(DefaultGracePeriodDays);
+        string? warning = null;
+
+        // Past the end of the term: within the grace period, a warning (the renewed key may not be
+        // deployed yet); past it, an error.
+        void Expired(double expiredDaysAgo)
+        {
+            if (today <= graceEnd)
+            {
+                warning = $"Your license term for the Lucky Penny software MediatR ended {expiredDaysAgo} days ago. " +
+                          $"Update your license key by {graceEnd:yyyy-MM-dd} ({graceEnd.Subtract(today).TotalDays} days remaining) to avoid license errors. " +
+                          "If you have renewed, your renewed license key is available at https://luckypennysoftware.com/account.";
+            }
+            else
+            {
+                errors.Add($"Your license for the Lucky Penny software MediatR expired {expiredDaysAgo} days ago.");
+            }
+        }
+
+        var diff = today.Subtract(termEnd).TotalDays;
         if (diff > 0)
         {
-            // If perpetual, check if build date is before expiration
+            // If perpetual, check if build date is before the end of the term
             if (license.IsPerpetual && _buildDate.HasValue)
             {
-                var buildDateDiff = _buildDate.Value.Date.Subtract(license.ExpirationDate.Value.Date).TotalDays;
+                var buildDateDiff = _buildDate.Value.Date.Subtract(termEnd).TotalDays;
                 if (buildDateDiff <= 0)
                 {
                     _logger.LogInformation(
                         "Your license for the Lucky Penny software MediatR expired {expiredDaysAgo} days ago, but perpetual licensing is active because the build date ({buildDate:O}) is before the license expiration date ({licenseExpiration:O}).",
-                        diff, _buildDate, license.ExpirationDate);
+                        diff, _buildDate, termEnd);
                     // Don't add to errors - perpetual fallback applies
                 }
                 else
                 {
-                    errors.Add($"Your license for the Lucky Penny software MediatR expired {diff} days ago.");
+                    Expired(diff);
                 }
             }
             else
@@ -62,7 +90,7 @@ internal class LicenseValidator
                     _logger.LogWarning(
                         "Your license for the Lucky Penny software MediatR has perpetual licensing enabled, but the build date could not be determined. Perpetual licensing cannot be applied. Please ensure the assembly metadata is correctly embedded at build time.");
                 }
-                errors.Add($"Your license for the Lucky Penny software MediatR expired {diff} days ago.");
+                Expired(diff);
             }
         }
 
@@ -82,12 +110,16 @@ internal class LicenseValidator
             _logger.LogError(
                 "Please visit https://luckypennysoftware.com to obtain a valid license for the Lucky Penny software MediatR.");
         }
+        else if (warning != null)
+        {
+            _logger.LogWarning(warning);
+        }
         else
         {
             _logger.LogInformation("You have a valid license key for the Lucky Penny software {type} {edition} edition. The license expires on {licenseExpiration}.",
                 license.ProductType,
                 license.Edition,
-                license.ExpirationDate);
+                termEnd);
         }
     }
 }

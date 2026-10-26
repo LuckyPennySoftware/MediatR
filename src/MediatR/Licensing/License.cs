@@ -33,6 +33,13 @@ internal class License
             ExpirationDate = expiredAt;
         }
 
+        // The real end of the license term. Keys issued with a grace period carry it separately from
+        // exp (term end + grace); older keys omit it and their exp is the term end.
+        if (long.TryParse(claims.FindFirst("term_end")?.Value, out var termEnd))
+        {
+            TermEndDate = DateTimeOffset.FromUnixTimeSeconds(termEnd);
+        }
+
         if (Enum.TryParse<Edition>(claims.FindFirst("edition")?.Value, out var edition))
         { 
             Edition = edition;
@@ -60,6 +67,7 @@ internal class License
     public string? SubscriptionId { get; }
     public DateTimeOffset? StartDate { get; }
     public DateTimeOffset? ExpirationDate { get; }
+    public DateTimeOffset? TermEndDate { get; }
     public Edition? Edition { get; }
     public ProductType? ProductType { get; }
     public bool IsPerpetual { get; }

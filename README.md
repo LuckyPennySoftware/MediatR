@@ -126,3 +126,7 @@ The license key is resolved in the following order of precedence, using the firs
 No code change is required when using an environment variable—just register MediatR as usual without setting the license key.
 
 You can register for your license key at [MediatR.io](https://mediatr.io)
+
+#### Renewal grace period
+
+License keys include a 30-day grace period after the end of their term. When your subscription renews, you receive a new license key, and the previous key keeps logging only a WARNING (not an ERROR) for 30 days after its term ends. This gives you time to deploy the renewed key. Your current license key is always available on your [account page](https://luckypennysoftware.com/account).
