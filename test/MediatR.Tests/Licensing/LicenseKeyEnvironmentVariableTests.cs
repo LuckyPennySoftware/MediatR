@@ -15,6 +15,68 @@ public class LicenseKeyEnvironmentVariableTests
 {
     private const string MediatREnvVar = LicenseAccessor.MediatRLicenseKeyEnvVariable;
     private const string SharedEnvVar = LicenseAccessor.SharedLicenseKeyEnvVariable;
+    private const string CleanKey = "header.pay-load.sign_ature";
+
+    public static TheoryData<string> KeysWithWhitespace => new()
+    {
+        CleanKey + "\n",
+        CleanKey + "\r\n",
+        CleanKey + " ",
+        CleanKey + "\t",
+        " \t" + CleanKey,
+        "header.\r\npay-\nload.sign_\tature",
+        "\u00a0header.\u2003pay-load.sign_ature\u2028"
+    };
+
+    [Theory]
+    [MemberData(nameof(KeysWithWhitespace))]
+    public void ConfigurationKey_StripsWhitespace_AndTakesPrecedence(string key)
+    {
+        WithEnvironment(mediatR: "env-mediatr-key", shared: "env-shared-key", () =>
+            LicenseAccessor.ResolveLicenseKey(key, "static-license-key").ShouldBe(CleanKey));
+    }
+
+    [Theory]
+    [MemberData(nameof(KeysWithWhitespace))]
+    public void StaticKey_StripsWhitespace(string key)
+    {
+        WithEnvironment(mediatR: "env-mediatr-key", shared: "env-shared-key", () =>
+            LicenseAccessor.ResolveLicenseKey(null, key).ShouldBe(CleanKey));
+    }
+
+    [Theory]
+    [MemberData(nameof(KeysWithWhitespace))]
+    public void MediatREnvironmentVariable_StripsWhitespace_AndTakesPrecedence(string key)
+    {
+        WithEnvironment(mediatR: key, shared: "env-shared-key", () =>
+            LicenseAccessor.ResolveLicenseKey(null, null).ShouldBe(CleanKey));
+    }
+
+    [Theory]
+    [MemberData(nameof(KeysWithWhitespace))]
+    public void SharedEnvironmentVariable_StripsWhitespace(string key)
+    {
+        WithEnvironment(mediatR: null, shared: key, () =>
+            LicenseAccessor.ResolveLicenseKey(null, null).ShouldBe(CleanKey));
+    }
+
+    [Theory]
+    [InlineData("\t\r\n")]
+    [InlineData("\u00a0\u2003\u2028")]
+    public void BlankKeys_FallBackToSharedEnvironmentVariable(string key)
+    {
+        WithEnvironment(mediatR: key, shared: " env-shared-key\n", () =>
+            LicenseAccessor.ResolveLicenseKey(key, key).ShouldBe("env-shared-key"));
+    }
+
+    [Theory]
+    [InlineData("\t\r\n")]
+    [InlineData("\u00a0\u2003\u2028")]
+    public void ReturnsNull_WhenAllKeysAreBlank(string key)
+    {
+        WithEnvironment(mediatR: key, shared: key, () =>
+            LicenseAccessor.ResolveLicenseKey(key, key).ShouldBeNull());
+    }
 
     [Fact]
     public void ExplicitKey_TakesPrecedence_OverBothEnvironmentVariables()
