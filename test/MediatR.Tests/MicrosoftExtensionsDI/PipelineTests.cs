@@ -1117,4 +1117,228 @@ public class PipelineTests
         result.ShouldNotBeEmpty();
         output.Messages.ShouldBe(new[] { "Nested behavior before", "Handler", "Nested behavior after" });
     }
+
+    // Types for issue #1180: behaviors constrained on a generic request marker interface
+    public interface ITxDbContext { }
+    public class TxAppDbContext : ITxDbContext { }
+
+    public interface IInvariantTxCommand<TDbContext> : IRequest where TDbContext : ITxDbContext { }
+    public interface ICovariantTxCommand<out TDbContext> : IRequest where TDbContext : ITxDbContext { }
+
+    public class InvariantTxCommand : IInvariantTxCommand<TxAppDbContext> { }
+    public class CovariantTxCommand : ICovariantTxCommand<TxAppDbContext> { }
+    public class ContextTxCommand : IInvariantTxCommand<TxAppDbContext> { }
+
+    public class InvariantTxCommandHandler : IRequestHandler<InvariantTxCommand>
+    {
+        private readonly Logger _output;
+        public InvariantTxCommandHandler(Logger output) => _output = output;
+        public Task Handle(InvariantTxCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class CovariantTxCommandHandler : IRequestHandler<CovariantTxCommand>
+    {
+        private readonly Logger _output;
+        public CovariantTxCommandHandler(Logger output) => _output = output;
+        public Task Handle(CovariantTxCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class ContextTxCommandHandler : IRequestHandler<ContextTxCommand>
+    {
+        private readonly Logger _output;
+        public ContextTxCommandHandler(Logger output) => _output = output;
+        public Task Handle(ContextTxCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class InvariantTxBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IInvariantTxCommand<ITxDbContext>
+    {
+        private readonly Logger _output;
+        public InvariantTxBehavior(Logger output) => _output = output;
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Tx before");
+            var response = await next();
+            _output.Messages.Add("Tx after");
+            return response;
+        }
+    }
+
+    public class CovariantTxBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : ICovariantTxCommand<ITxDbContext>
+    {
+        private readonly Logger _output;
+        public CovariantTxBehavior(Logger output) => _output = output;
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Tx before");
+            var response = await next();
+            _output.Messages.Add("Tx after");
+            return response;
+        }
+    }
+
+    public class ContextTxBehavior<TRequest, TResponse, TDbContext> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IInvariantTxCommand<TDbContext>
+        where TDbContext : ITxDbContext
+    {
+        private readonly Logger _output;
+        public ContextTxBehavior(Logger output) => _output = output;
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Tx before {typeof(TDbContext).Name}");
+            var response = await next();
+            _output.Messages.Add($"Tx after {typeof(TDbContext).Name}");
+            return response;
+        }
+    }
+
+    private static (IMediator Mediator, Logger Output) BuildTxMediator(Type openBehaviorType)
+    {
+        var output = new Logger();
+        IServiceCollection services = new ServiceCollection();
+        services.AddSingleton(output);
+        services.AddFakeLogging();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(PipelineTests).Assembly);
+            cfg.AddOpenBehavior(openBehaviorType);
+        });
+        var provider = services.BuildServiceProvider();
+        return (provider.GetRequiredService<IMediator>(), output);
+    }
+
+    [Fact]
+    public async Task Should_skip_open_behavior_when_request_constraint_uses_invariant_generic_interface()
+    {
+        var (mediator, output) = BuildTxMediator(typeof(InvariantTxBehavior<,>));
+
+        await mediator.Send(new InvariantTxCommand());
+
+        output.Messages.ShouldBe(new[] { "Handler" });
+    }
+
+    [Fact]
+    public async Task Should_apply_open_behavior_when_request_constraint_uses_covariant_generic_interface()
+    {
+        var (mediator, output) = BuildTxMediator(typeof(CovariantTxBehavior<,>));
+
+        await mediator.Send(new CovariantTxCommand());
+
+        output.Messages.ShouldBe(new[] { "Tx before", "Handler", "Tx after" });
+    }
+
+    [Fact]
+    public async Task Should_apply_open_behavior_with_type_parameter_bound_from_request_constraint()
+    {
+        var (mediator, output) = BuildTxMediator(typeof(ContextTxBehavior<,,>));
+
+        await mediator.Send(new ContextTxCommand());
+
+        output.Messages.ShouldBe(new[] { "Tx before TxAppDbContext", "Handler", "Tx after TxAppDbContext" });
+    }
+
+    public interface IKeyedTxDbContext<TKey> { }
+    public class OtherTxDbContext : ITxDbContext { }
+    public class KeyedTxDbContext : ITxDbContext, IKeyedTxDbContext<int> { }
+
+    public class KeyedTxCommand : IInvariantTxCommand<KeyedTxDbContext> { }
+    public class DualTxCommand : IInvariantTxCommand<TxAppDbContext>, IInvariantTxCommand<OtherTxDbContext> { }
+
+    public class KeyedTxCommandHandler : IRequestHandler<KeyedTxCommand>
+    {
+        private readonly Logger _output;
+        public KeyedTxCommandHandler(Logger output) => _output = output;
+        public Task Handle(KeyedTxCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class DualTxCommandHandler : IRequestHandler<DualTxCommand>
+    {
+        private readonly Logger _output;
+        public DualTxCommandHandler(Logger output) => _output = output;
+        public Task Handle(DualTxCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class KeyedTxBehavior<TRequest, TResponse, TDbContext, TKey> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IInvariantTxCommand<TDbContext>
+        where TDbContext : ITxDbContext, IKeyedTxDbContext<TKey>
+    {
+        private readonly Logger _output;
+        public KeyedTxBehavior(Logger output) => _output = output;
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Tx before {typeof(TDbContext).Name}:{typeof(TKey).Name}");
+            var response = await next();
+            _output.Messages.Add($"Tx after {typeof(TDbContext).Name}:{typeof(TKey).Name}");
+            return response;
+        }
+    }
+
+    public class UninferrableBehavior<TRequest, TResponse, TExtra> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+        where TExtra : new()
+    {
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) => next();
+    }
+
+    [Fact]
+    public async Task Should_apply_open_behavior_with_type_parameters_bound_through_chained_constraints()
+    {
+        var (mediator, output) = BuildTxMediator(typeof(KeyedTxBehavior<,,,>));
+
+        await mediator.Send(new KeyedTxCommand());
+
+        output.Messages.ShouldBe(new[] { "Tx before KeyedTxDbContext:Int32", "Handler", "Tx after KeyedTxDbContext:Int32" });
+    }
+
+    [Fact]
+    public async Task Should_apply_open_behavior_once_per_constraint_match_when_request_implements_marker_twice()
+    {
+        var (mediator, output) = BuildTxMediator(typeof(ContextTxBehavior<,,>));
+
+        await mediator.Send(new DualTxCommand());
+
+        output.Messages.Count.ShouldBe(5);
+        output.Messages.ShouldContain("Tx before TxAppDbContext");
+        output.Messages.ShouldContain("Tx before OtherTxDbContext");
+        output.Messages[2].ShouldBe("Handler");
+    }
+
+    [Fact]
+    public async Task Should_not_apply_open_behavior_with_extra_type_parameter_to_unrelated_requests()
+    {
+        var (mediator, output) = BuildTxMediator(typeof(ContextTxBehavior<,,>));
+
+        await mediator.Send(new CovariantTxCommand());
+
+        output.Messages.ShouldBe(new[] { "Handler" });
+    }
+
+    [Fact]
+    public void Should_throw_when_open_behavior_type_parameter_cannot_be_inferred()
+    {
+        var ex = Should.Throw<InvalidOperationException>(() => BuildTxMediator(typeof(UninferrableBehavior<,,>)));
+
+        ex.Message.ShouldContain("TExtra");
+    }
 }
