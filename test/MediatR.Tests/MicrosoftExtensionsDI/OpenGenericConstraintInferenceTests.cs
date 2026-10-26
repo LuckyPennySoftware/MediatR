@@ -321,4 +321,94 @@ public class OpenGenericConstraintInferenceTests
 
         output.Messages.ShouldBe(new[] { "Dual behavior Foo", "Handler", "Dual behavior Bar", "Handler" });
     }
+
+    // Repeated parameters that line up with different types under variance, and many independent constraint links
+
+    public interface IPair<out TLeft, out TRight> { }
+    public class PairCommand : IRequest, IPair<DerivedThing, BaseThing> { }
+
+    public class PairCommandHandler : IRequestHandler<PairCommand>
+    {
+        private readonly Logger _output;
+        public PairCommandHandler(Logger output) => _output = output;
+        public Task Handle(PairCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    // TItem lines up with DerivedThing and BaseThing; only BaseThing satisfies both covariant positions
+    public class PairBehavior<TRequest, TResponse, TItem> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IPair<TItem, TItem>
+    {
+        private readonly Logger _output;
+        public PairBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Pair behavior {typeof(TItem).Name}");
+            return next();
+        }
+    }
+
+    public interface ISlot1<T> { }
+    public interface ISlot2<T> { }
+    public interface ISlot3<T> { }
+    public interface ISlot4<T> { }
+    public interface ISlot5<T> { }
+    public interface ISlot6<T> { }
+    public interface ISlot7<T> { }
+    public interface ISlot8<T> { }
+    public interface ISlot9<T> { }
+    public interface ISlot10<T> { }
+
+    public class SlotCommand : IRequest, ISlot1<int>, ISlot2<int>, ISlot3<int>, ISlot4<int>, ISlot5<int>, ISlot6<int>, ISlot7<int>, ISlot8<int>, ISlot9<int>, ISlot10<int> { }
+
+    public class SlotCommandHandler : IRequestHandler<SlotCommand>
+    {
+        private readonly Logger _output;
+        public SlotCommandHandler(Logger output) => _output = output;
+        public Task Handle(SlotCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class ManySlotBehavior<TRequest, TResponse, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : ISlot1<T1>, ISlot2<T2>, ISlot3<T3>, ISlot4<T4>, ISlot5<T5>, ISlot6<T6>, ISlot7<T7>, ISlot8<T8>, ISlot9<T9>, ISlot10<T10>
+    {
+        private readonly Logger _output;
+        public ManySlotBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Slot behavior");
+            return next();
+        }
+    }
+
+    [Fact]
+    public async Task Should_try_every_occurrence_of_a_repeated_type_parameter_in_a_constraint()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(PairBehavior<,,>)));
+
+        await mediator.Send(new PairCommand());
+
+        output.Messages.ShouldBe(new[] { "Pair behavior BaseThing", "Handler" });
+    }
+
+    [Fact]
+    public async Task Should_infer_many_independent_type_parameters_without_exploring_every_ordering()
+    {
+        // Exploring every ordering of the 10 constraint links visits 10! = 3,628,800 paths per matching request;
+        // pruning repeated binding states visits at most 2^10 = 1,024
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(ManySlotBehavior<,,,,,,,,,,,>)));
+        stopwatch.Stop();
+
+        await mediator.Send(new SlotCommand());
+
+        output.Messages.ShouldBe(new[] { "Slot behavior", "Handler" });
+        stopwatch.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(5));
+    }
 }

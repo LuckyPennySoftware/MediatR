@@ -417,26 +417,20 @@ public static class ServiceRegistrar
             || !interfaces[0].GetGenericArguments().SequenceEqual(openImplementationType.GetGenericArguments());
     }
 
-    // Binds the generic parameters in pattern by matching it structurally against concrete.
-    // Strict matching (service type arguments) requires everything else to be identical.
-    // Lenient matching (constraints) only binds parameters that are still unknown and accepts any other argument,
-    // since MakeGenericType re-checks every constraint afterwards, including variance
-    // (e.g. a request implementing IMarker<AppDbContext> satisfies where TRequest : IMarker<IDbContext> when IMarker is covariant).
-    private static bool TryMatchType(Type pattern, Type concrete, Dictionary<Type, Type> bindings, bool lenient = false)
+    // Binds the generic parameters in a service type argument by matching it structurally against the concrete type.
+    // Everything other than the parameters must be identical.
+    private static bool TryMatchType(Type pattern, Type concrete, Dictionary<Type, Type> bindings)
     {
         if (pattern.IsGenericParameter)
         {
-            if (bindings.TryGetValue(pattern, out var existing)) return lenient || existing == concrete;
+            if (bindings.TryGetValue(pattern, out var existing)) return existing == concrete;
             bindings[pattern] = concrete;
             return true;
         }
-        if (lenient && !pattern.ContainsGenericParameters) return true;
         if (pattern.IsArray)
         {
-            return concrete.IsArray
-                && pattern.GetArrayRank() == concrete.GetArrayRank()
-                && IsSzArray(pattern) == IsSzArray(concrete)
-                && TryMatchType(pattern.GetElementType()!, concrete.GetElementType()!, bindings, lenient);
+            return IsSameArrayShape(pattern, concrete)
+                && TryMatchType(pattern.GetElementType()!, concrete.GetElementType()!, bindings);
         }
         if (pattern.IsGenericType && concrete.IsGenericType)
         {
@@ -444,10 +438,48 @@ public static class ServiceRegistrar
             var pArgs = pattern.GetGenericArguments();
             var cArgs = concrete.GetGenericArguments();
             if (pArgs.Length != cArgs.Length) return false;
-            return pArgs.Zip(cArgs, (p, c) => TryMatchType(p, c, bindings, lenient)).All(x => x);
+            return pArgs.Zip(cArgs, (p, c) => TryMatchType(p, c, bindings)).All(x => x);
         }
         return pattern == concrete;
     }
+
+    // Matches a constraint structurally against a type the bound parameter implements, collecting every type
+    // each still-unknown parameter lines up with. Known parameters and fixed arguments are accepted as they are,
+    // since MakeGenericType re-checks every constraint afterwards, including variance
+    // (e.g. a request implementing IMarker<AppDbContext> satisfies where TRequest : IMarker<IDbContext> when IMarker is covariant).
+    // A parameter can line up with different types when it occurs more than once under variance
+    // (IPair<TItem, TItem> against IPair<Derived, Base>), so all of them are kept as candidates.
+    private static bool TryCollectConstraintCandidates(
+        Type pattern, Type concrete, IReadOnlyDictionary<Type, Type> known, Dictionary<Type, HashSet<Type>> candidates)
+    {
+        if (pattern.IsGenericParameter)
+        {
+            if (known.ContainsKey(pattern)) return true;
+            if (!candidates.TryGetValue(pattern, out var types)) candidates[pattern] = types = new HashSet<Type>();
+            types.Add(concrete);
+            return true;
+        }
+        if (!pattern.ContainsGenericParameters) return true;
+        if (pattern.IsArray)
+        {
+            return IsSameArrayShape(pattern, concrete)
+                && TryCollectConstraintCandidates(pattern.GetElementType()!, concrete.GetElementType()!, known, candidates);
+        }
+        if (pattern.IsGenericType && concrete.IsGenericType)
+        {
+            if (pattern.GetGenericTypeDefinition() != concrete.GetGenericTypeDefinition()) return false;
+            var pArgs = pattern.GetGenericArguments();
+            var cArgs = concrete.GetGenericArguments();
+            if (pArgs.Length != cArgs.Length) return false;
+            return pArgs.Zip(cArgs, (p, c) => TryCollectConstraintCandidates(p, c, known, candidates)).All(x => x);
+        }
+        return false;
+    }
+
+    private static bool IsSameArrayShape(Type pattern, Type concrete) =>
+        concrete.IsArray
+        && pattern.GetArrayRank() == concrete.GetArrayRank()
+        && IsSzArray(pattern) == IsSzArray(concrete);
 
     // T[] and T[*] both have rank 1; only the single-dimensional zero-based one round-trips through MakeArrayType()
     private static bool IsSzArray(Type arrayType) => arrayType == arrayType.GetElementType()!.MakeArrayType();
@@ -477,10 +509,15 @@ public static class ServiceRegistrar
     // TransactionBehavior<TRequest, TResponse, TDbContext> where TRequest : ITransactionalCommand<TDbContext>.
     // Returns every complete set of bindings, since a request may implement the constraint more than once,
     // and every constraint that links to an unknown parameter is tried, so the result doesn't depend on
-    // the order parameters or constraints are declared in. Callers may see the same bindings more than once.
+    // the order parameters or constraints are declared in. Different link orders reach the same partial bindings,
+    // so visited states are skipped; without that, n independent links would be explored in n! orders.
     private static IEnumerable<Dictionary<Type, Type>> ExpandBindingsFromConstraints(
-        Type[] behaviorParams, Dictionary<Type, Type> bindings)
+        Type[] behaviorParams, Dictionary<Type, Type> bindings, HashSet<string> visited)
     {
+        var state = string.Join("|", behaviorParams.Select(tp =>
+            bindings.TryGetValue(tp, out var bound) ? bound.AssemblyQualifiedName ?? bound.ToString() : "?"));
+        if (!visited.Add(state)) yield break;
+
         if (behaviorParams.All(bindings.ContainsKey))
         {
             yield return bindings;
@@ -497,15 +534,32 @@ public static class ServiceRegistrar
         {
             foreach (var candidate in GetSelfBaseTypesAndInterfaces(bindings[link.Param]))
             {
-                var extended = new Dictionary<Type, Type>(bindings);
-                if (!TryMatchType(link.Constraint, candidate, extended, lenient: true) || extended.Count == bindings.Count) continue;
+                var candidates = new Dictionary<Type, HashSet<Type>>();
+                if (!TryCollectConstraintCandidates(link.Constraint, candidate, bindings, candidates) || candidates.Count == 0) continue;
 
-                foreach (var result in ExpandBindingsFromConstraints(behaviorParams, extended))
+                foreach (var extended in CombineCandidates(bindings, candidates))
                 {
-                    yield return result;
+                    foreach (var result in ExpandBindingsFromConstraints(behaviorParams, extended, visited))
+                    {
+                        yield return result;
+                    }
                 }
             }
         }
+    }
+
+    // Every combination of one candidate type per newly inferred parameter
+    private static IEnumerable<Dictionary<Type, Type>> CombineCandidates(
+        Dictionary<Type, Type> bindings, Dictionary<Type, HashSet<Type>> candidates)
+    {
+        IEnumerable<Dictionary<Type, Type>> combinations = new[] { bindings };
+        foreach (var pair in candidates)
+        {
+            var (param, types) = (pair.Key, pair.Value);
+            combinations = combinations.SelectMany(partial => types.Select(type =>
+                new Dictionary<Type, Type>(partial) { [param] = type }));
+        }
+        return combinations;
     }
 
     private static void ValidateTypeParametersCanBeInferred(Type openImplementationType, Type iface)
@@ -561,7 +615,7 @@ public static class ServiceRegistrar
 
             var closedService = openServiceType.MakeGenericType(serviceArgs);
             var closedImplementations = new HashSet<Type>();
-            foreach (var complete in ExpandBindingsFromConstraints(implParams, bindings))
+            foreach (var complete in ExpandBindingsFromConstraints(implParams, bindings, new HashSet<string>()))
             {
                 try
                 {
