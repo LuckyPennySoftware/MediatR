@@ -43,6 +43,13 @@ public class MediatRServiceConfiguration
     public RequestExceptionActionProcessorStrategy RequestExceptionActionProcessorStrategy { get; set; }
         = RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions;
 
+    /// <summary>
+    /// Who closes open behaviors and processors whose type parameters don't map one-to-one onto the service interface.
+    /// Default value is <see cref="DependencyInjection.OpenBehaviorClosingStrategy.CloseForScannedRequests"/>
+    /// </summary>
+    public OpenBehaviorClosingStrategy OpenBehaviorClosingStrategy { get; set; }
+        = OpenBehaviorClosingStrategy.CloseForScannedRequests;
+
     internal List<Assembly> AssembliesToRegister { get; } = new();
 
     /// <summary>

@@ -550,17 +550,21 @@ public static class ServiceRegistrar
     // Open implementations the DI container can't close positionally (nested generics such as List<T>,
     // or extra type parameters inferred from constraints) are closed explicitly by scanning
     // the registered assemblies for matching requests. The open registration is skipped for these,
-    // since the container would either close it incorrectly or reject it for mismatched arity.
+    // since the Microsoft container would either close it incorrectly or reject it for mismatched arity,
+    // and containers that can close it would apply it a second time for scanned requests.
+    // With CloseInContainer, implementations of matching arity are left open for the container to close instead.
     private static void RegisterOpenGenericServices(
         IServiceCollection services, IEnumerable<ServiceDescriptor> serviceDescriptors, Type openServiceType,
-        Lazy<IEnumerable<(Type RequestType, Type ResponseType)>> requests)
+        Lazy<IEnumerable<(Type RequestType, Type ResponseType)>> requests, OpenBehaviorClosingStrategy closingStrategy)
     {
         foreach (var serviceDescriptor in serviceDescriptors)
         {
             if (serviceDescriptor.ImplementationType != null
                 && serviceDescriptor.ServiceType == openServiceType
                 && serviceDescriptor.ImplementationType.IsOpenGeneric()
-                && RequiresExplicitClosing(serviceDescriptor.ImplementationType, openServiceType))
+                && RequiresExplicitClosing(serviceDescriptor.ImplementationType, openServiceType)
+                && !(closingStrategy == OpenBehaviorClosingStrategy.CloseInContainer
+                     && serviceDescriptor.ImplementationType.GetGenericArguments().Length == openServiceType.GetGenericArguments().Length))
             {
                 var iface = GetOpenServiceInterface(serviceDescriptor.ImplementationType, openServiceType)!;
                 ValidateTypeParametersCanBeInferred(serviceDescriptor.ImplementationType, iface);
@@ -626,17 +630,17 @@ public static class ServiceRegistrar
         if (serviceConfiguration.RequestPreProcessorsToRegister.Any())
         {
             services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>), ServiceLifetime.Transient));
-            RegisterOpenGenericServices(services, serviceConfiguration.RequestPreProcessorsToRegister, typeof(IRequestPreProcessor<>), requests);
+            RegisterOpenGenericServices(services, serviceConfiguration.RequestPreProcessorsToRegister, typeof(IRequestPreProcessor<>), requests, serviceConfiguration.OpenBehaviorClosingStrategy);
         }
 
         if (serviceConfiguration.RequestPostProcessorsToRegister.Any())
         {
             services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>), ServiceLifetime.Transient));
-            RegisterOpenGenericServices(services, serviceConfiguration.RequestPostProcessorsToRegister, typeof(IRequestPostProcessor<,>), requests);
+            RegisterOpenGenericServices(services, serviceConfiguration.RequestPostProcessorsToRegister, typeof(IRequestPostProcessor<,>), requests, serviceConfiguration.OpenBehaviorClosingStrategy);
         }
 
-        RegisterOpenGenericServices(services, serviceConfiguration.BehaviorsToRegister, typeof(IPipelineBehavior<,>), requests);
-        RegisterOpenGenericServices(services, serviceConfiguration.StreamBehaviorsToRegister, typeof(IStreamPipelineBehavior<,>), streamRequests);
+        RegisterOpenGenericServices(services, serviceConfiguration.BehaviorsToRegister, typeof(IPipelineBehavior<,>), requests, serviceConfiguration.OpenBehaviorClosingStrategy);
+        RegisterOpenGenericServices(services, serviceConfiguration.StreamBehaviorsToRegister, typeof(IStreamPipelineBehavior<,>), streamRequests, serviceConfiguration.OpenBehaviorClosingStrategy);
     }
 
     private static void RegisterBehaviorIfImplementationsExist(IServiceCollection services, Type behaviorType, Type subBehaviorType)
