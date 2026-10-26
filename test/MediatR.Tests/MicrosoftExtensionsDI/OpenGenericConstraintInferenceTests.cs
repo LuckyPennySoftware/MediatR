@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
@@ -147,5 +147,178 @@ public class OpenGenericConstraintInferenceTests
         await mediator.Send(new CovariantTxCommand());
 
         output.Messages.ShouldBe(new[] { "Handler" });
+    }
+
+    // Review follow-ups: array arguments, multiple constraint links, variance on fixed arguments,
+    // and implementations that close the service interface more than once
+
+    public interface IArrayMarker<T> { }
+    public class ArrayCommand : IRequest, IArrayMarker<int[]> { }
+
+    public class ArrayCommandHandler : IRequestHandler<ArrayCommand>
+    {
+        private readonly Logger _output;
+        public ArrayCommandHandler(Logger output) => _output = output;
+        public Task Handle(ArrayCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class ArrayElementBehavior<TRequest, TResponse, TItem> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IArrayMarker<TItem[]>
+    {
+        private readonly Logger _output;
+        public ArrayElementBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Array behavior {typeof(TItem).Name}");
+            return next();
+        }
+    }
+
+    public class BaseThing { }
+    public class DerivedThing : BaseThing { }
+    public interface ICovariantLink<out T> { }
+    public interface IInvariantLink<T> { }
+
+    public class LinkResponse : IInvariantLink<BaseThing> { }
+    public class LinkRequest : IRequest<LinkResponse>, ICovariantLink<DerivedThing> { }
+
+    public class LinkRequestHandler : IRequestHandler<LinkRequest, LinkResponse>
+    {
+        private readonly Logger _output;
+        public LinkRequestHandler(Logger output) => _output = output;
+        public Task<LinkResponse> Handle(LinkRequest request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.FromResult(new LinkResponse());
+        }
+    }
+
+    // The request's constraint is tried first and infers DerivedThing, which the response's invariant
+    // constraint rejects; only the response's constraint infers BaseThing, which satisfies both
+    public class TwoLinkBehavior<TRequest, TResponse, TThing> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : ICovariantLink<TThing>
+        where TResponse : IInvariantLink<TThing>
+    {
+        private readonly Logger _output;
+        public TwoLinkBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Link behavior {typeof(TThing).Name}");
+            return next();
+        }
+    }
+
+    public interface IVariantTagMarker<out TContext, TTag> { }
+    public class VariantTagCommand : IRequest, IVariantTagMarker<TxAppDbContext, int> { }
+
+    public class VariantTagCommandHandler : IRequestHandler<VariantTagCommand>
+    {
+        private readonly Logger _output;
+        public VariantTagCommandHandler(Logger output) => _output = output;
+        public Task Handle(VariantTagCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class VariantTagBehavior<TRequest, TResponse, TTag> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IVariantTagMarker<ITxDbContext, TTag>
+    {
+        private readonly Logger _output;
+        public VariantTagBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Tag behavior {typeof(TTag).Name}");
+            return next();
+        }
+    }
+
+    public class DualFooRequest : IRequest<Pong> { }
+    public class DualBarRequest : IRequest<Pong> { }
+
+    public class DualFooRequestHandler : IRequestHandler<DualFooRequest, Pong>
+    {
+        private readonly Logger _output;
+        public DualFooRequestHandler(Logger output) => _output = output;
+        public Task<Pong> Handle(DualFooRequest request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.FromResult(new Pong());
+        }
+    }
+
+    public class DualBarRequestHandler : IRequestHandler<DualBarRequest, Pong>
+    {
+        private readonly Logger _output;
+        public DualBarRequestHandler(Logger output) => _output = output;
+        public Task<Pong> Handle(DualBarRequest request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.FromResult(new Pong());
+        }
+    }
+
+    public class DualBehavior<TResponse> : IPipelineBehavior<DualFooRequest, TResponse>, IPipelineBehavior<DualBarRequest, TResponse>
+    {
+        private readonly Logger _output;
+        public DualBehavior(Logger output) => _output = output;
+
+        public Task<TResponse> Handle(DualFooRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Dual behavior Foo");
+            return next();
+        }
+
+        public Task<TResponse> Handle(DualBarRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Dual behavior Bar");
+            return next();
+        }
+    }
+
+    [Fact]
+    public async Task Should_infer_type_parameter_from_array_element_in_constraint()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(ArrayElementBehavior<,,>)));
+
+        await mediator.Send(new ArrayCommand());
+
+        output.Messages.ShouldBe(new[] { "Array behavior Int32", "Handler" });
+    }
+
+    [Fact]
+    public async Task Should_try_every_constraint_link_when_inferring_type_parameter()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(TwoLinkBehavior<,,>)));
+
+        await mediator.Send(new LinkRequest());
+
+        output.Messages.ShouldBe(new[] { "Link behavior BaseThing", "Handler" });
+    }
+
+    [Fact]
+    public async Task Should_infer_type_parameter_when_fixed_constraint_argument_is_satisfied_by_variance()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(VariantTagBehavior<,,>)));
+
+        await mediator.Send(new VariantTagCommand());
+
+        output.Messages.ShouldBe(new[] { "Tag behavior Int32", "Handler" });
+    }
+
+    [Fact]
+    public async Task Should_close_every_service_interface_an_open_behavior_implements()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(DualBehavior<>)));
+
+        await mediator.Send(new DualFooRequest());
+        await mediator.Send(new DualBarRequest());
+
+        output.Messages.ShouldBe(new[] { "Dual behavior Foo", "Handler", "Dual behavior Bar", "Handler" });
     }
 }
