@@ -377,4 +377,19 @@ public class LicenseValidatorTests
         logMessages.ShouldNotContain(log => log.Level == LogLevel.Error || log.Level == LogLevel.Warning);
         logMessages.ShouldContain(log => log.Level == LogLevel.Information && log.Message.Contains("perpetual"));
     }
+
+    [Fact]
+    public void Should_log_nothing_when_validation_is_unsupported_on_this_platform()
+    {
+        var factory = new LoggerFactory();
+        var provider = new FakeLoggerProvider();
+        factory.AddProvider(provider);
+
+        var licenseValidator = new LicenseValidator(factory);
+        var license = new License { IsValidationUnsupported = true };
+
+        licenseValidator.Validate(license);
+
+        provider.Collector.GetSnapshot().ShouldBeEmpty();
+    }
 }
