@@ -495,4 +495,46 @@ public class OpenGenericConstraintInferenceTests
 
         output.Messages.ShouldBe(new[] { "Nested variance behavior Int32", "Handler" });
     }
+
+    // A chained constraint can revise a parameter that was already inferred directly (#1185)
+
+    public interface IInvariantMarker<T> { }
+    public class ChainHolder : ICovariantMarker<BaseThing> { }
+    public class ChainCommand : IRequest, ICovariantMarker<DerivedThing>, IInvariantMarker<ChainHolder> { }
+
+    public class ChainCommandHandler : IRequestHandler<ChainCommand>
+    {
+        private readonly Logger _output;
+        public ChainCommandHandler(Logger output) => _output = output;
+        public Task Handle(ChainCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    // TRequest alone infers TItem = DerivedThing, but THolder only satisfies ICovariantMarker<BaseThing>;
+    // TItem = BaseThing comes from the constraint on THolder
+    public class ChainBehavior<TRequest, TResponse, TItem, THolder> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : ICovariantMarker<TItem>, IInvariantMarker<THolder>
+        where THolder : ICovariantMarker<TItem>
+    {
+        private readonly Logger _output;
+        public ChainBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Chain behavior {typeof(TItem).Name},{typeof(THolder).Name}");
+            return next();
+        }
+    }
+
+    [Fact]
+    public async Task Should_revise_inferred_type_parameter_from_chained_constraint()
+    {
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(ChainBehavior<,,,>)));
+
+        await mediator.Send(new ChainCommand());
+
+        output.Messages.ShouldBe(new[] { "Chain behavior BaseThing,ChainHolder", "Handler" });
+    }
 }
