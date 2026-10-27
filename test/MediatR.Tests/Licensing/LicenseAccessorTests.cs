@@ -232,7 +232,7 @@ public class LicenseAccessorTests
     {
         var log = logs.ShouldHaveSingleItem();
         log.Level.ShouldBe(LogLevel.Information);
-        log.Message.ShouldContain("Blazor WASM");
+        log.Message.ShouldContain(LicenseAccessor.ClientPlatformsLink);
     }
 
     private static string Base64Url(string json) =>
