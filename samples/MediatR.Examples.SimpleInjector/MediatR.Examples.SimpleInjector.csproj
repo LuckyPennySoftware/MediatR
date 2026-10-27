@@ -10,9 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SimpleInjector" Version="5.5.0" />
-    <PackageReference Include="SimpleInjector.Integration.ServiceCollection" Version="5.5.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="SimpleInjector" />
+    <PackageReference Include="SimpleInjector.Integration.ServiceCollection" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
 
 </Project>
