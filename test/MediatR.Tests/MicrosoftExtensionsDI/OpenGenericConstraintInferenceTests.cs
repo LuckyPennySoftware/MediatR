@@ -537,4 +537,95 @@ public class OpenGenericConstraintInferenceTests
 
         output.Messages.ShouldBe(new[] { "Chain behavior BaseThing,ChainHolder", "Handler" });
     }
+
+    // Two roots, each starting an invariant chain of 16 links; only the first chain ends in IStepEnd.
+    // Pooling the candidates of both chains gives 2^16 combinations unless partial bindings are pruned
+
+    public interface IStepRoot<T> { }
+    public interface IStep<T> { }
+    public interface IStepEnd { }
+    public class AStep1 : IStep<AStep2> { }
+    public class AStep2 : IStep<AStep3> { }
+    public class AStep3 : IStep<AStep4> { }
+    public class AStep4 : IStep<AStep5> { }
+    public class AStep5 : IStep<AStep6> { }
+    public class AStep6 : IStep<AStep7> { }
+    public class AStep7 : IStep<AStep8> { }
+    public class AStep8 : IStep<AStep9> { }
+    public class AStep9 : IStep<AStep10> { }
+    public class AStep10 : IStep<AStep11> { }
+    public class AStep11 : IStep<AStep12> { }
+    public class AStep12 : IStep<AStep13> { }
+    public class AStep13 : IStep<AStep14> { }
+    public class AStep14 : IStep<AStep15> { }
+    public class AStep15 : IStep<AStep16> { }
+    public class AStep16 : IStepEnd { }
+    public class BStep1 : IStep<BStep2> { }
+    public class BStep2 : IStep<BStep3> { }
+    public class BStep3 : IStep<BStep4> { }
+    public class BStep4 : IStep<BStep5> { }
+    public class BStep5 : IStep<BStep6> { }
+    public class BStep6 : IStep<BStep7> { }
+    public class BStep7 : IStep<BStep8> { }
+    public class BStep8 : IStep<BStep9> { }
+    public class BStep9 : IStep<BStep10> { }
+    public class BStep10 : IStep<BStep11> { }
+    public class BStep11 : IStep<BStep12> { }
+    public class BStep12 : IStep<BStep13> { }
+    public class BStep13 : IStep<BStep14> { }
+    public class BStep14 : IStep<BStep15> { }
+    public class BStep15 : IStep<BStep16> { }
+    public class BStep16 { }
+    public class TwoChainCommand : IRequest, IStepRoot<AStep1>, IStepRoot<BStep1> { }
+
+    public class TwoChainCommandHandler : IRequestHandler<TwoChainCommand>
+    {
+        private readonly Logger _output;
+        public TwoChainCommandHandler(Logger output) => _output = output;
+        public Task Handle(TwoChainCommand request, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class TwoChainBehavior<TRequest, TResponse, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IStepRoot<T1>
+        where T1 : IStep<T2>
+        where T2 : IStep<T3>
+        where T3 : IStep<T4>
+        where T4 : IStep<T5>
+        where T5 : IStep<T6>
+        where T6 : IStep<T7>
+        where T7 : IStep<T8>
+        where T8 : IStep<T9>
+        where T9 : IStep<T10>
+        where T10 : IStep<T11>
+        where T11 : IStep<T12>
+        where T12 : IStep<T13>
+        where T13 : IStep<T14>
+        where T14 : IStep<T15>
+        where T15 : IStep<T16>
+        where T16 : IStepEnd
+    {
+        private readonly Logger _output;
+        public TwoChainBehavior(Logger output) => _output = output;
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            _output.Messages.Add($"Two-chain behavior {typeof(T1).Name}");
+            return next();
+        }
+    }
+
+    [Fact]
+    public async Task Should_keep_chained_candidates_from_different_roots_apart()
+    {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var (mediator, output) = BuildMediator(cfg => cfg.AddOpenBehavior(typeof(TwoChainBehavior<,,,,,,,,,,,,,,,,,>)));
+
+        await mediator.Send(new TwoChainCommand());
+
+        output.Messages.ShouldBe(new[] { "Two-chain behavior AStep1", "Handler" });
+        stopwatch.Elapsed.ShouldBeLessThan(TimeSpan.FromMilliseconds(500));
+    }
 }

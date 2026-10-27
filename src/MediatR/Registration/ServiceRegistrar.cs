@@ -582,21 +582,76 @@ public static class ServiceRegistrar
 
         if (!behaviorParams.All(p => bindings.ContainsKey(p) || candidates.ContainsKey(p))) return Enumerable.Empty<Dictionary<Type, Type>>();
 
-        return CombineCandidates(bindings, candidates);
+        return CombineCandidates(behaviorParams, bindings, candidates);
     }
 
-    // Every combination of one candidate type per inferred parameter
+    // Every combination of one candidate type per inferred parameter. Candidates are pooled per parameter, so they
+    // no longer say which chain they came from (two roots each leading down an invariant chain would give 2^n
+    // combinations); a partial binding is dropped as soon as a constraint whose parameters are all bound rejects it.
+    // Parameters are assigned in the order they were inferred, so each link is checked right after it's bound.
     private static IEnumerable<Dictionary<Type, Type>> CombineCandidates(
-        Dictionary<Type, Type> bindings, Dictionary<Type, HashSet<Type>> candidates)
+        Type[] behaviorParams, Dictionary<Type, Type> bindings, Dictionary<Type, HashSet<Type>> candidates)
     {
-        IEnumerable<Dictionary<Type, Type>> combinations = new[] { bindings };
-        foreach (var pair in candidates)
+        var order = candidates.Keys.ToList();
+        var notYetCheckable = behaviorParams.Where(p => !IsCheckable(p, bindings)).ToList();
+        return Assign(0, bindings, notYetCheckable);
+
+        IEnumerable<Dictionary<Type, Type>> Assign(int index, Dictionary<Type, Type> partial, List<Type> uncheckedParams)
         {
-            var (param, types) = (pair.Key, pair.Value);
-            combinations = combinations.SelectMany(partial => types.Select(type =>
-                new Dictionary<Type, Type>(partial) { [param] = type }));
+            if (index == order.Count)
+            {
+                yield return partial;
+                yield break;
+            }
+
+            foreach (var type in candidates[order[index]])
+            {
+                var extended = new Dictionary<Type, Type>(partial) { [order[index]] = type };
+                var nowCheckable = uncheckedParams.Where(p => IsCheckable(p, extended)).ToList();
+                if (!nowCheckable.All(p => SatisfiesTypeConstraints(p, extended))) continue;
+
+                foreach (var result in Assign(index + 1, extended, uncheckedParams.Except(nowCheckable).ToList()))
+                {
+                    yield return result;
+                }
+            }
         }
-        return combinations;
+    }
+
+    private static bool IsCheckable(Type param, IReadOnlyDictionary<Type, Type> bindings) =>
+        bindings.ContainsKey(param)
+        && param.GetGenericParameterConstraints().SelectMany(GetGenericParametersIn).All(bindings.ContainsKey);
+
+    // Only rejects what MakeGenericType would reject too; special constraints (class, struct, new())
+    // and constraint types that can't be closed are left to MakeGenericType
+    private static bool SatisfiesTypeConstraints(Type param, IReadOnlyDictionary<Type, Type> bindings)
+    {
+        foreach (var constraint in param.GetGenericParameterConstraints())
+        {
+            Type closedConstraint;
+            try
+            {
+                closedConstraint = Substitute(constraint, bindings);
+            }
+            catch (ArgumentException)
+            {
+                continue;
+            }
+            if (!closedConstraint.IsAssignableFrom(bindings[param])) return false;
+        }
+        return true;
+    }
+
+    private static Type Substitute(Type type, IReadOnlyDictionary<Type, Type> bindings)
+    {
+        if (type.IsGenericParameter) return bindings[type];
+        if (!type.ContainsGenericParameters) return type;
+        if (type.IsArray)
+        {
+            var element = Substitute(type.GetElementType()!, bindings);
+            return IsSzArray(type) ? element.MakeArrayType() : element.MakeArrayType(type.GetArrayRank());
+        }
+        return type.GetGenericTypeDefinition().MakeGenericType(type.GetGenericArguments().Select(a => Substitute(a, bindings)).ToArray());
     }
 
     private static void ValidateTypeParametersCanBeInferred(Type openImplementationType, Type iface)
