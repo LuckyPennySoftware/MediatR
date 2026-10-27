@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
@@ -173,6 +174,10 @@ internal class LicenseAccessor
                 "The Lucky Penny software license key is not valid: its signature does not match. " +
                 "If the key was copied from a PDF, email, or file, it may have been corrupted; " +
                 "copy the full key again from https://luckypennysoftware.com/account.",
+            _ when ContainsAssemblyMismatch(exception) =>
+                "The Lucky Penny software license key could not be validated because the Microsoft.IdentityModel " +
+                "packages in this application are different versions. Reference the same version of all " +
+                "Microsoft.IdentityModel.* packages (for example, by referencing Microsoft.IdentityModel.JsonWebTokens directly).",
             SecurityTokenMalformedException or ArgumentException =>
                 "The Lucky Penny software license key appears to be incomplete or corrupted. " +
                 "Copy the full key again from https://luckypennysoftware.com/account.",
@@ -196,9 +201,19 @@ internal class LicenseAccessor
             _ => ContainsPlatformNotSupported(exception.InnerException)
         };
 
+    // Mixed Microsoft.IdentityModel.* package versions surface as IDX14102 wrapping a MissingMethodException.
+    internal static bool ContainsAssemblyMismatch(Exception? exception) =>
+        exception switch
+        {
+            null => false,
+            MissingMemberException or TypeLoadException or FileLoadException => true,
+            AggregateException aggregate => aggregate.InnerExceptions.Any(ContainsAssemblyMismatch),
+            _ => ContainsAssemblyMismatch(exception.InnerException)
+        };
+
     private void LogPlatformNotSupported() =>
         _logger.LogInformation(
-            "RSA cryptography is not supported on this platform. The license key does not need to be set " +
-            "on client applications such as Blazor WASM. See: " +
-            "https://github.com/LuckyPennySoftware/MediatR#setting-the-license-key");
+            "RSA cryptography is not supported on this platform. " +
+            "For client redistribution scenarios such as Blazor WASM, see: " +
+            "https://github.com/LuckyPennySoftware/MediatR/wiki/License-Key-Configuration#client-redistribution-scenarios");
 }

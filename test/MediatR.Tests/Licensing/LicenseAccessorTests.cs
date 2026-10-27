@@ -151,6 +151,19 @@ public class LicenseAccessorTests
     }
 
     [Fact]
+    public void MismatchedIdentityModelVersions_LogsPackageVersionMessage_WithoutExceptionDetails()
+    {
+        // The shape seen in support: IDX14102 wrapping a MissingMethodException from mixed package versions.
+        var exception = new ArgumentException("IDX14102",
+            new MissingMethodException("Method not found: 'Void Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode'"));
+
+        var logs = LogValidationFailure(exception);
+
+        ShouldLogPlainCritical(logs, "Microsoft.IdentityModel");
+        ShouldLogDetailsAtDebug<ArgumentException>(logs);
+    }
+
+    [Fact]
     public void WrongIssuer_LogsNotALuckyPennyKey_WithoutExceptionDetails()
     {
         var logs = LogValidationFailure(new SecurityTokenInvalidIssuerException("IDX10205"));
