@@ -537,61 +537,121 @@ public static class ServiceRegistrar
     // Behavior type parameters that appear in neither TRequest nor TResponse can still be inferred
     // when a constraint links them to a parameter that is already known, e.g.
     // TransactionBehavior<TRequest, TResponse, TDbContext> where TRequest : ITransactionalCommand<TDbContext>.
-    // Each pass collects candidates for every unknown parameter from every constraint on a known parameter,
-    // then tries each combination, so the result doesn't depend on declaration order, parameters inferred by
-    // different constraints are combined, and independent constraints don't multiply the work.
-    // Further passes only happen for constraint chains (TDbContext : IDbContext<TKey>), so the depth is bounded
-    // by the number of type parameters. Every complete set of bindings is returned, since a request may implement
-    // a constraint more than once; MakeGenericType rejects the combinations that don't satisfy every constraint.
+    // Candidates are collected for every inferred parameter from the constraints on every parameter with candidates,
+    // until no new candidates turn up, and then each combination is tried. Candidates keep flowing through
+    // constraint chains (TDbContext : IDbContext<TKey>) to parameters that already have candidates, so a chain
+    // can offer a type the direct route doesn't, as when variance lets the direct route find only a derived type.
+    // Collecting per parameter rather than per binding keeps independent constraints from multiplying the work,
+    // and the result doesn't depend on declaration order. A pass extends every chain by one link, so the passes
+    // are capped at the number of type parameters, which also stops expansive constraint cycles.
+    // Every combination is returned, since a request may implement a constraint more than once;
+    // MakeGenericType rejects the combinations that don't satisfy every constraint.
     private static IEnumerable<Dictionary<Type, Type>> ExpandBindingsFromConstraints(
         Type[] behaviorParams, Dictionary<Type, Type> bindings)
     {
-        if (behaviorParams.All(bindings.ContainsKey))
-        {
-            yield return bindings;
-            yield break;
-        }
-
         var candidates = new Dictionary<Type, HashSet<Type>>();
-        foreach (var knownParam in behaviorParams.Where(bindings.ContainsKey))
+        var pending = bindings.ToDictionary(pair => pair.Key, pair => new HashSet<Type> { pair.Value });
+
+        for (var pass = 0; pass < behaviorParams.Length && pending.Count > 0; pass++)
         {
-            foreach (var constraint in knownParam.GetGenericParameterConstraints()
-                         .Where(c => GetGenericParametersIn(c).Any(p => !bindings.ContainsKey(p))))
+            var found = new Dictionary<Type, HashSet<Type>>();
+            foreach (var pair in pending)
             {
-                foreach (var candidate in GetSelfBaseTypesAndInterfaces(bindings[knownParam]))
+                foreach (var constraint in pair.Key.GetGenericParameterConstraints()
+                             .Where(c => GetGenericParametersIn(c).Any(p => !bindings.ContainsKey(p))))
                 {
-                    var found = new Dictionary<Type, HashSet<Type>>();
-                    if (TryCollectConstraintCandidates(constraint, candidate, bindings, found))
+                    foreach (var candidate in pair.Value.SelectMany(GetSelfBaseTypesAndInterfaces))
                     {
-                        MergeCandidates(candidates, found);
+                        var collected = new Dictionary<Type, HashSet<Type>>();
+                        if (TryCollectConstraintCandidates(constraint, candidate, bindings, collected))
+                        {
+                            MergeCandidates(found, collected);
+                        }
                     }
                 }
             }
+
+            pending = new Dictionary<Type, HashSet<Type>>();
+            foreach (var pair in found)
+            {
+                if (!candidates.TryGetValue(pair.Key, out var types)) candidates[pair.Key] = types = new HashSet<Type>();
+                var added = pair.Value.Where(types.Add).ToList();
+                if (added.Count > 0) pending[pair.Key] = new HashSet<Type>(added);
+            }
         }
 
-        if (candidates.Count == 0) yield break;
+        if (!behaviorParams.All(p => bindings.ContainsKey(p) || candidates.ContainsKey(p))) return Enumerable.Empty<Dictionary<Type, Type>>();
 
-        foreach (var extended in CombineCandidates(bindings, candidates))
+        return CombineCandidates(behaviorParams, bindings, candidates);
+    }
+
+    // Every combination of one candidate type per inferred parameter. Candidates are pooled per parameter, so they
+    // no longer say which chain they came from (two roots each leading down an invariant chain would give 2^n
+    // combinations); a partial binding is dropped as soon as a constraint whose parameters are all bound rejects it.
+    // Parameters are assigned in the order they were inferred, so each link is checked right after it's bound.
+    private static IEnumerable<Dictionary<Type, Type>> CombineCandidates(
+        Type[] behaviorParams, Dictionary<Type, Type> bindings, Dictionary<Type, HashSet<Type>> candidates)
+    {
+        var order = candidates.Keys.ToList();
+        var notYetCheckable = behaviorParams.Where(p => !IsCheckable(p, bindings)).ToList();
+        return Assign(0, bindings, notYetCheckable);
+
+        IEnumerable<Dictionary<Type, Type>> Assign(int index, Dictionary<Type, Type> partial, List<Type> uncheckedParams)
         {
-            foreach (var result in ExpandBindingsFromConstraints(behaviorParams, extended))
+            if (index == order.Count)
             {
-                yield return result;
+                yield return partial;
+                yield break;
+            }
+
+            foreach (var type in candidates[order[index]])
+            {
+                var extended = new Dictionary<Type, Type>(partial) { [order[index]] = type };
+                var nowCheckable = uncheckedParams.Where(p => IsCheckable(p, extended)).ToList();
+                if (!nowCheckable.All(p => SatisfiesTypeConstraints(p, extended))) continue;
+
+                foreach (var result in Assign(index + 1, extended, uncheckedParams.Except(nowCheckable).ToList()))
+                {
+                    yield return result;
+                }
             }
         }
     }
 
-    // Every combination of one candidate type per newly inferred parameter
-    private static IEnumerable<Dictionary<Type, Type>> CombineCandidates(
-        Dictionary<Type, Type> bindings, Dictionary<Type, HashSet<Type>> candidates)
+    private static bool IsCheckable(Type param, IReadOnlyDictionary<Type, Type> bindings) =>
+        bindings.ContainsKey(param)
+        && param.GetGenericParameterConstraints().SelectMany(GetGenericParametersIn).All(bindings.ContainsKey);
+
+    // Only rejects what MakeGenericType would reject too; special constraints (class, struct, new())
+    // and constraint types that can't be closed are left to MakeGenericType
+    private static bool SatisfiesTypeConstraints(Type param, IReadOnlyDictionary<Type, Type> bindings)
     {
-        IEnumerable<Dictionary<Type, Type>> combinations = new[] { bindings };
-        foreach (var pair in candidates)
+        foreach (var constraint in param.GetGenericParameterConstraints())
         {
-            var (param, types) = (pair.Key, pair.Value);
-            combinations = combinations.SelectMany(partial => types.Select(type =>
-                new Dictionary<Type, Type>(partial) { [param] = type }));
+            Type closedConstraint;
+            try
+            {
+                closedConstraint = Substitute(constraint, bindings);
+            }
+            catch (ArgumentException)
+            {
+                continue;
+            }
+            if (!closedConstraint.IsAssignableFrom(bindings[param])) return false;
         }
-        return combinations;
+        return true;
+    }
+
+    private static Type Substitute(Type type, IReadOnlyDictionary<Type, Type> bindings)
+    {
+        if (type.IsGenericParameter) return bindings[type];
+        if (!type.ContainsGenericParameters) return type;
+        if (type.IsArray)
+        {
+            var element = Substitute(type.GetElementType()!, bindings);
+            return IsSzArray(type) ? element.MakeArrayType() : element.MakeArrayType(type.GetArrayRank());
+        }
+        return type.GetGenericTypeDefinition().MakeGenericType(type.GetGenericArguments().Select(a => Substitute(a, bindings)).ToArray());
     }
 
     private static void ValidateTypeParametersCanBeInferred(Type openImplementationType, Type iface)
