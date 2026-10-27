@@ -26,6 +26,11 @@ internal class LicenseValidator
     {
         var errors = new List<string>();
 
+        if (license is { IsValidationUnsupported: true })
+        {
+            return;
+        }
+
         if (license is not { IsConfigured: true })
         {
             var message = "You do not have a valid license key for the Lucky Penny software MediatR. " +

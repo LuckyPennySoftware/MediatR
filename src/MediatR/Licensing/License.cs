@@ -73,4 +73,8 @@ internal class License
     public bool IsPerpetual { get; }
 
     public bool IsConfigured { get; }
+
+    // Set when this platform can't validate license keys (no RSA, e.g. Blazor WASM). The accessor has
+    // already logged client-platform guidance, so validation logs nothing further.
+    public bool IsValidationUnsupported { get; internal set; }
 }
