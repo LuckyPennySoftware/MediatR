@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MediatR.Licensing;
 using Microsoft.Extensions.DependencyInjection;
@@ -107,14 +108,24 @@ public class LicenseAccessorTests
     }
 
     [Fact]
-    public void InvalidSignature_LogsCriticalWithCopyPasteHint()
+    public void InvalidSignature_LogsCopyPasteHint_WithoutExceptionDetails()
     {
         var logs = Validate(WellFormedKey);
 
-        var log = logs.ShouldHaveSingleItem();
-        log.Level.ShouldBe(LogLevel.Critical);
-        log.Exception.ShouldBeOfType<SecurityTokenInvalidSignatureException>();
-        log.Message.ShouldContain("copy the full key again");
+        ShouldLogPlainCritical(logs, "copy the full key again");
+        ShouldLogDetailsAtDebug<SecurityTokenInvalidSignatureException>(logs);
+    }
+
+    [Fact]
+    public void UnparseableToken_LogsIncompleteMessage_WithoutExceptionDetails()
+    {
+        var key = string.Join(".", "bm90LWpzb24", "bm90LWpzb24", new string('A', 342));
+
+        var logs = Validate(key);
+
+        ShouldLogPlainCritical(logs, "incomplete or corrupted");
+        // IdentityModel reports an undecodable header as IDX14102, an ArgumentException.
+        ShouldLogDetailsAtDebug<ArgumentException>(logs);
     }
 
     [Fact]
@@ -140,12 +151,43 @@ public class LicenseAccessorTests
     }
 
     [Fact]
-    public void OtherValidationFailure_LogsCritical()
+    public void WrongIssuer_LogsNotALuckyPennyKey_WithoutExceptionDetails()
     {
         var logs = LogValidationFailure(new SecurityTokenInvalidIssuerException("IDX10205"));
 
-        logs.ShouldHaveSingleItem().Level.ShouldBe(LogLevel.Critical);
+        ShouldLogPlainCritical(logs, "not a Lucky Penny Software license key");
+        ShouldLogDetailsAtDebug<SecurityTokenInvalidIssuerException>(logs);
     }
+
+    [Fact]
+    public void WrongAudience_LogsNotALuckyPennyKey_WithoutExceptionDetails()
+    {
+        var logs = LogValidationFailure(new SecurityTokenInvalidAudienceException("IDX10214"));
+
+        ShouldLogPlainCritical(logs, "not a Lucky Penny Software license key");
+        ShouldLogDetailsAtDebug<SecurityTokenInvalidAudienceException>(logs);
+    }
+
+    [Fact]
+    public void OtherValidationFailure_LogsGenericMessage_WithoutExceptionDetails()
+    {
+        var logs = LogValidationFailure(new SecurityTokenException("IDX10000"));
+
+        ShouldLogPlainCritical(logs, "contact support");
+        ShouldLogDetailsAtDebug<SecurityTokenException>(logs);
+    }
+
+    private static void ShouldLogPlainCritical(IReadOnlyList<FakeLogRecord> logs, string expected)
+    {
+        var critical = logs.Where(log => log.Level == LogLevel.Critical).ShouldHaveSingleItem();
+        critical.Exception.ShouldBeNull();
+        critical.Message.ShouldContain(expected);
+        critical.Message.ShouldNotContain("IDX");
+        logs.ShouldAllBe(log => log.Level == LogLevel.Critical || log.Level == LogLevel.Debug);
+    }
+
+    private static void ShouldLogDetailsAtDebug<TException>(IReadOnlyList<FakeLogRecord> logs) where TException : Exception =>
+        logs.Where(log => log.Level == LogLevel.Debug).ShouldHaveSingleItem().Exception.ShouldBeOfType<TException>();
 
     private static IReadOnlyList<FakeLogRecord> Validate(string key) =>
         WithAccessor(accessor => accessor.ValidateKey(key).ShouldBeEmpty());

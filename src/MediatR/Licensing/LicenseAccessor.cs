@@ -162,18 +162,29 @@ internal class LicenseAccessor
         if (ContainsPlatformNotSupported(exception))
         {
             LogPlatformNotSupported();
+            return;
         }
-        else if (exception is SecurityTokenInvalidSignatureException)
+
+        // IdentityModel's IDX messages aren't actionable for customers (and hide most details unless PII
+        // logging is on), so log a plain message and keep the exception at debug level for support.
+        _logger.LogCritical(exception switch
         {
-            _logger.LogCritical(exception,
-                "Error validating the Lucky Penny software license key: the signature is invalid. " +
+            SecurityTokenInvalidSignatureException =>
+                "The Lucky Penny software license key is not valid: its signature does not match. " +
                 "If the key was copied from a PDF, email, or file, it may have been corrupted; " +
-                "copy the full key again from https://luckypennysoftware.com/account.");
-        }
-        else
-        {
-            _logger.LogCritical(exception, "Error validating the Lucky Penny software license key");
-        }
+                "copy the full key again from https://luckypennysoftware.com/account.",
+            SecurityTokenMalformedException or ArgumentException =>
+                "The Lucky Penny software license key appears to be incomplete or corrupted. " +
+                "Copy the full key again from https://luckypennysoftware.com/account.",
+            SecurityTokenInvalidIssuerException or SecurityTokenInvalidAudienceException =>
+                "The Lucky Penny software license key is not valid: it is not a Lucky Penny Software license key. " +
+                "Copy your license key from https://luckypennysoftware.com/account.",
+            _ =>
+                "Error validating the Lucky Penny software license key. " +
+                "Copy the full key again from https://luckypennysoftware.com/account. " +
+                "If the problem persists, enable debug logging for this category and contact support."
+        });
+        _logger.LogDebug(exception, "License key validation failure details");
     }
 
     internal static bool ContainsPlatformNotSupported(Exception? exception) =>
