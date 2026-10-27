@@ -17,6 +17,7 @@
     <File Path="Build.ps1" />
     <File Path="BuildContracts.ps1" />
     <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
     <File Path="MediatR.snk" />
     <File Path="Push.ps1" />
     <File Path="README.md" />

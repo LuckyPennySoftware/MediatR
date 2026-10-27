@@ -1,0 +1,48 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- Library dependencies: ranges here flow directly into the published nuspec -->
+  <ItemGroup>
+    <PackageVersion Include="IsExternalInit" Version="1.0.3" />
+    <PackageVersion Include="MediatR.Contracts" Version="[2.0.1, 3.0.0)" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="[10.0.0, )" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[10.0.0, )" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="[10.0.0, )" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="[8.14.0, )" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
+    <PackageVersion Include="MinVer" Version="6.0.0" />
+  </ItemGroup>
+
+  <!-- Tests and benchmarks -->
+  <ItemGroup>
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.10" />
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="Scrutor" Version="6.1.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="System.Reflection.TypeExtensions" Version="4.7.0" />
+    <PackageVersion Include="xunit" Version="2.6.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <!-- Containers used by tests and samples -->
+  <ItemGroup>
+    <PackageVersion Include="Autofac" Version="8.4.0" />
+    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageVersion Include="Castle.Windsor" Version="5.1.2" />
+    <PackageVersion Include="Castle.Windsor.Extensions.DependencyInjection" Version="5.1.2" />
+    <PackageVersion Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
+    <PackageVersion Include="Lamar" Version="15.0.1" />
+    <PackageVersion Include="Lamar.Microsoft.DependencyInjection" Version="15.0.1" />
+    <PackageVersion Include="LightInject" Version="7.0.1" />
+    <PackageVersion Include="LightInject.Microsoft.DependencyInjection" Version="4.0.3" />
+    <PackageVersion Include="SimpleInjector" Version="5.5.0" />
+    <PackageVersion Include="SimpleInjector.Integration.ServiceCollection" Version="5.5.0" />
+    <PackageVersion Include="Stashbox" Version="5.17.1" />
+    <PackageVersion Include="Stashbox.Extensions.DependencyInjection" Version="5.7.0" />
+  </ItemGroup>
+</Project>
