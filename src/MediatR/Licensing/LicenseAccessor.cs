@@ -101,6 +101,12 @@ internal class LicenseAccessor
             "2LTtdJV2b0mYoRqChRCfcqnbpKvsiCcDYwJ+qPtvQXWXozOhGo02/V0SWMFBdbZHUzpEytIiEcojo7Vbq5mQmt4lg92auyPKsWq6qSmCVZCUuL/kpYqLCit4yUC0YqZfw4H9zLf1yAIOgyXQf1x6g+kscDo1pWAniSl9a9l/LXRVEnGz+OfeUrN/5gzpracGUY6phx6T09UCRuzi4YqqO4VJzL877W0jCW2Q7jMzHxOK04VSjNc22CADuCd34mrFs23R0vVm1DVLYtPGD76/rGOcxO6vmRc7ydBAvt1IoUsrY0vQ2rahp51YPxqqhKPd8nNOomHWblCCA7YUeV3C1Q==")
     };
 
+    // Isolated from the process-wide CryptoProviderFactory.Default, which the host app may customize and
+    // whose signature provider cache it shares. IdentityModel reports any failure there as an IDX10511
+    // signature mismatch, indistinguishable from a corrupted key. Validation runs once per process,
+    // so skipping the cache costs nothing noticeable.
+    private static readonly CryptoProviderFactory LicenseCryptoProviderFactory = new() { CacheSignatureProviders = false };
+
     internal Claim[] ValidateKey(string licenseKey)
     {
         if (!IsWellFormed(licenseKey))
@@ -127,7 +133,8 @@ internal class LicenseAccessor
 
             var key = new RsaSecurityKey(LicenseKeyParameters)
             {
-                KeyId = "LuckyPennySoftwareLicenseKey/bbb13acb59904d89b4cb1c85f088ccf9"
+                KeyId = "LuckyPennySoftwareLicenseKey/bbb13acb59904d89b4cb1c85f088ccf9",
+                CryptoProviderFactory = LicenseCryptoProviderFactory
             };
 
             var parms = new TokenValidationParameters
