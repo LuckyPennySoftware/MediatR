@@ -158,6 +158,121 @@ public class LicenseKeyFactoryTests
         loggerProvider.Exception.ShouldBeOfType<InvalidOperationException>();
     }
 
+    // The first Mediator is often created from a request scope, which can be gone by the time a slow factory fails.
+    [Fact]
+    public void Should_log_an_exception_from_the_factory_after_the_initiating_scope_is_disposed()
+    {
+        using var scopeDisposed = new ManualResetEventSlim(false);
+        var loggerProvider = new SignalingLoggerProvider();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<ILoggerProvider>(loggerProvider);
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Mediator).Assembly);
+            cfg.LicenseKeyFactory = _ =>
+            {
+                scopeDisposed.Wait(Timeout);
+                throw new InvalidOperationException("secret store unavailable");
+            };
+        });
+
+        using var container = services.BuildServiceProvider();
+
+        using (var scope = container.CreateScope())
+        {
+            MediatRServiceCollectionExtensions.LicenseChecked = false;
+            _ = scope.ServiceProvider.GetRequiredService<IMediator>();
+        }
+        scopeDisposed.Set();
+
+        loggerProvider.LicenseLogged.Wait(Timeout).ShouldBeTrue();
+        loggerProvider.Level.ShouldBe(LogLevel.Error);
+        loggerProvider.Exception.ShouldBeOfType<InvalidOperationException>();
+    }
+
+    // Holding up the LicenseAccessor singleton build keeps every thread past CheckLicense's first check
+    // at the same time, so without an atomic check they would each start validation and call the factory.
+    [Fact]
+    public void Should_call_a_failing_factory_once_for_concurrent_first_resolutions()
+    {
+        const int threadCount = 4;
+        var factoryCalls = 0;
+        var loggerProvider = new SignalingLoggerProvider();
+        var configuration = new MediatRServiceConfiguration
+        {
+            LicenseKeyFactory = _ =>
+            {
+                Interlocked.Increment(ref factoryCalls);
+                throw new InvalidOperationException("secret store unavailable");
+            }
+        };
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<ILoggerProvider>(loggerProvider);
+        services.AddSingleton(_ =>
+        {
+            Thread.Sleep(200);
+            return configuration;
+        });
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Mediator).Assembly));
+
+        using var container = services.BuildServiceProvider();
+        using var barrier = new Barrier(threadCount);
+
+        MediatRServiceCollectionExtensions.LicenseChecked = false;
+        var threads = Enumerable.Range(0, threadCount)
+            .Select(index => new Thread(() =>
+            {
+                barrier.SignalAndWait();
+                _ = container.GetRequiredService<IMediator>();
+            }))
+            .ToArray();
+        Array.ForEach(threads, thread => thread.Start());
+        Array.ForEach(threads, thread => thread.Join());
+
+        loggerProvider.LicenseLogged.Wait(Timeout).ShouldBeTrue();
+
+        // Allow time for a duplicate validation to show up, since a correct run never produces one.
+        SpinWait.SpinUntil(() => Volatile.Read(ref factoryCalls) > 1, TimeSpan.FromMilliseconds(500));
+        factoryCalls.ShouldBe(1);
+    }
+
+    [Fact]
+    public void Should_call_the_factory_once_when_the_license_is_read_concurrently()
+    {
+        const int threadCount = 8;
+        using var container = new ServiceCollection().BuildServiceProvider();
+
+        for (var iteration = 0; iteration < 200; iteration++)
+        {
+            var factoryCalls = 0;
+            var accessor = new LicenseAccessor(new MediatRServiceConfiguration
+            {
+                LicenseKeyFactory = _ =>
+                {
+                    Interlocked.Increment(ref factoryCalls);
+                    return null;
+                }
+            }, container, NullLoggerFactory.Instance);
+
+            using var barrier = new Barrier(threadCount);
+            var threads = Enumerable.Range(0, threadCount)
+                .Select(index => new Thread(() =>
+                {
+                    barrier.SignalAndWait();
+                    _ = accessor.Current;
+                }))
+                .ToArray();
+            Array.ForEach(threads, thread => thread.Start());
+            Array.ForEach(threads, thread => thread.Join());
+
+            factoryCalls.ShouldBe(1);
+        }
+    }
+
     private static IReadOnlyList<FakeLogRecord> ReadLicense(MediatRServiceConfiguration configuration, string? providerKey = null)
     {
         var loggerProvider = new FakeLoggerProvider();

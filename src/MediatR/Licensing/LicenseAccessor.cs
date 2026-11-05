@@ -50,43 +50,44 @@ internal class LicenseAccessor
 
     internal bool IsValidationUnsupported => _validationUnsupported;
 
-    public License Current => _license ??= Initialize();
+    public License Current => _license ?? Initialize();
 
     private License Initialize()
     {
         lock (_lock)
         {
-            if (_license != null)
-            {
-                return _license;
-            }
-
-            // Current is only read on the dedicated background validation thread (see
-            // MediatRServiceCollectionExtensions.CheckLicense), so a factory that does slow work, such as
-            // reading a secret store, can't block Mediator construction. If it throws, CheckLicense logs it.
-            var factoryKey = _serviceProvider is null
-                ? null
-                : _configuration?.LicenseKeyFactory?.Invoke(_serviceProvider);
-
-            var key = ResolveLicenseKey(factoryKey, _configuration?.LicenseKey, Mediator.LicenseKey);
-
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                return new License();
-            }
-
-            var licenseClaims = ValidateKey(key!);
-            if (_validationUnsupported)
-            {
-                return new License { IsValidationUnsupported = true };
-            }
-
-            return licenseClaims.Any() 
-                ? new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims))) 
-                : new License();
+            // Assign inside the lock, so a thread waiting on it can't create the license a second time.
+            return _license ??= CreateLicense();
         }
     }
-    
+
+    private License CreateLicense()
+    {
+        // Current is only read on the dedicated background validation thread (see
+        // MediatRServiceCollectionExtensions.CheckLicense), so a factory that does slow work, such as
+        // reading a secret store, can't block Mediator construction. If it throws, CheckLicense logs it.
+        var factoryKey = _serviceProvider is null
+            ? null
+            : _configuration?.LicenseKeyFactory?.Invoke(_serviceProvider);
+
+        var key = ResolveLicenseKey(factoryKey, _configuration?.LicenseKey, Mediator.LicenseKey);
+
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return new License();
+        }
+
+        var licenseClaims = ValidateKey(key!);
+        if (_validationUnsupported)
+        {
+            return new License { IsValidationUnsupported = true };
+        }
+
+        return licenseClaims.Any()
+            ? new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)))
+            : new License();
+    }
+
     /// <summary>
     /// Resolves the license key using the first non-blank value, in order of precedence: the
     /// explicitly configured keys (the <see cref="MediatRServiceConfiguration.LicenseKeyFactory"/> result,
