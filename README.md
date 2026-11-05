@@ -126,6 +126,17 @@ services.AddMediatR(cfg =>
 })
 ```
 
+If the key comes from a service in the container, such as a secret store client, use a factory:
+
+```csharp
+services.AddMediatR(cfg => 
+{
+    cfg.LicenseKeyFactory = sp => sp.GetRequiredService<ILicenseKeyProvider>().GetMediatRLicense();
+})
+```
+
+The factory runs on a background thread after the first `Mediator` is created, so slow work won't delay startup or block `Mediator` construction. It receives the root service provider, so it can't resolve scoped services. If it throws, the exception is logged under the license log category. `AddOptions<MediatRServiceConfiguration>()` isn't supported, because MediatR needs its configuration while registering services, before a service provider exists.
+
 Or if not using Microsoft.Extensions.DependencyInjection:
 
 ```csharp
@@ -146,7 +157,7 @@ If no license key is set in code, MediatR looks for one in environment variables
 
 The license key is resolved in the following order of precedence, using the first value found:
 
-1. An explicit value set in code (`cfg.LicenseKey` or `Mediator.LicenseKey`).
+1. An explicit value set in code (`cfg.LicenseKeyFactory`, `cfg.LicenseKey`, then `Mediator.LicenseKey`).
 2. The `MEDIATR_LICENSE_KEY` environment variable.
 3. The `LUCKYPENNY_LICENSE_KEY` environment variable.
 

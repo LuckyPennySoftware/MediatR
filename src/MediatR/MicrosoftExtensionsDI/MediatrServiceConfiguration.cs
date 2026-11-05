@@ -108,6 +108,18 @@ public class MediatRServiceConfiguration
     public string? LicenseKey { get; set; }
 
     /// <summary>
+    /// Gets or sets a factory that supplies the license key from a service in the container, for keys that aren't
+    /// available when calling <c>AddMediatR</c>. It takes precedence over <see cref="LicenseKey"/>; returning a null
+    /// or blank value falls through to the other license key sources.
+    /// </summary>
+    /// <remarks>
+    /// The factory is called at most once, on a background thread, after the first <see cref="Mediator"/> is created.
+    /// It receives the root service provider, so it can't resolve scoped services. Any exception it throws is logged
+    /// and doesn't affect <see cref="Mediator"/> behavior.
+    /// </remarks>
+    public Func<IServiceProvider, string?>? LicenseKeyFactory { get; set; }
+
+    /// <summary>
     /// Register various handlers from assembly containing given type
     /// </summary>
     /// <typeparam name="T">Type from assembly to scan</typeparam>
