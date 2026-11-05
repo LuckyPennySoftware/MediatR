@@ -131,7 +131,7 @@ If the key comes from a service in the container, such as a secret store client,
 ```csharp
 services.AddMediatR(cfg => 
 {
-    cfg.LicenseKeyFactory = sp => sp.GetRequiredService<ILicenseKeyProvider>().GetMediatRLicense();
+    cfg.LicenseKeyFactory = sp => sp.GetRequiredService<ISecretStore>().GetSecret("MediatR-License-Key");
 })
 ```
 
