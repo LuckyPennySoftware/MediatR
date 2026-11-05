@@ -72,7 +72,15 @@ public static class MediatRServiceCollectionExtensions
         var licenseAccessor = serviceProvider.GetRequiredService<LicenseAccessor>();
         var licenseValidator = serviceProvider.GetRequiredService<LicenseValidator>();
 
-        LicenseChecked = true;
+        // The first Mediator is often created from a request scope, which may be disposed before validation
+        // finishes, so get the logger now rather than from that provider when an error occurs.
+        var logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger("LuckyPennySoftware.MediatR.License");
+
+        // Concurrent first resolutions can all get here, but only one may validate.
+        if (Interlocked.Exchange(ref _licenseChecked, 1) == 1)
+        {
+            return;
+        }
 
         // License validation is logging-only — it gates no Mediator behavior. Running it on the
         // Mediator construction path is unsafe: under a lazily-built DI singleton the container
@@ -80,13 +88,13 @@ public static class MediatRServiceCollectionExtensions
         // app (same root cause as AutoMapper #4640, which used Task.Run(...).GetResult() under a
         // singleton-build lock). Offload the JWT validation to a dedicated background thread.
         _ = Task.Factory.StartNew(
-            () => ValidateLicense(serviceProvider, licenseAccessor, licenseValidator),
+            () => ValidateLicense(logger, licenseAccessor, licenseValidator),
             CancellationToken.None,
             TaskCreationOptions.LongRunning, // dedicated thread, never the (possibly starved) pool
             TaskScheduler.Default);          // honor LongRunning regardless of the ambient scheduler
     }
 
-    private static void ValidateLicense(IServiceProvider serviceProvider, LicenseAccessor licenseAccessor, LicenseValidator licenseValidator)
+    private static void ValidateLicense(ILogger? logger, LicenseAccessor licenseAccessor, LicenseValidator licenseValidator)
     {
         try
         {
@@ -96,11 +104,15 @@ public static class MediatRServiceCollectionExtensions
         catch (Exception ex)
         {
             // Never let a fire-and-forget failure surface as an unobserved task exception.
-            serviceProvider.GetService<ILoggerFactory>()?
-                .CreateLogger("LuckyPennySoftware.MediatR.License")
-                .LogError(ex, "Error validating the Lucky Penny software license key");
+            logger?.LogError(ex, "Error validating the Lucky Penny software license key");
         }
     }
 
-    internal static bool LicenseChecked { get; set; }
+    private static int _licenseChecked;
+
+    internal static bool LicenseChecked
+    {
+        get => Volatile.Read(ref _licenseChecked) == 1;
+        set => Volatile.Write(ref _licenseChecked, value ? 1 : 0);
+    }
 }

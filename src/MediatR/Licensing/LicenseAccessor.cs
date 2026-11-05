@@ -24,14 +24,21 @@ internal class LicenseAccessor
     internal const string IdentityModelVersionsLink = "https://luckypennysoftware.com/go/mediatr-identitymodel-versions";
 
     private readonly MediatRServiceConfiguration? _configuration;
+    private readonly IServiceProvider? _serviceProvider;
     private readonly ILogger _logger;
+
+    public LicenseAccessor(MediatRServiceConfiguration configuration, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        : this(configuration, loggerFactory)
+    {
+        _serviceProvider = serviceProvider;
+    }
 
     public LicenseAccessor(MediatRServiceConfiguration configuration, ILoggerFactory loggerFactory)
     {
         _configuration = configuration;
         _logger = loggerFactory.CreateLogger("LuckyPennySoftware.MediatR.License");
-    }   
-    
+    }
+
     public LicenseAccessor(ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger("LuckyPennySoftware.MediatR.License");
@@ -43,40 +50,49 @@ internal class LicenseAccessor
 
     internal bool IsValidationUnsupported => _validationUnsupported;
 
-    public License Current => _license ??= Initialize();
+    public License Current => _license ?? Initialize();
 
     private License Initialize()
     {
         lock (_lock)
         {
-            if (_license != null)
-            {
-                return _license;
-            }
-
-            var key = ResolveLicenseKey(_configuration?.LicenseKey, Mediator.LicenseKey);
-
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                return new License();
-            }
-
-            var licenseClaims = ValidateKey(key!);
-            if (_validationUnsupported)
-            {
-                return new License { IsValidationUnsupported = true };
-            }
-
-            return licenseClaims.Any() 
-                ? new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims))) 
-                : new License();
+            // Assign inside the lock, so a thread waiting on it can't create the license a second time.
+            return _license ??= CreateLicense();
         }
     }
-    
+
+    private License CreateLicense()
+    {
+        // Current is only read on the dedicated background validation thread (see
+        // MediatRServiceCollectionExtensions.CheckLicense), so a factory that does slow work, such as
+        // reading a secret store, can't block Mediator construction. If it throws, CheckLicense logs it.
+        var factoryKey = _serviceProvider is null
+            ? null
+            : _configuration?.LicenseKeyFactory?.Invoke(_serviceProvider);
+
+        var key = ResolveLicenseKey(factoryKey, _configuration?.LicenseKey, Mediator.LicenseKey);
+
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return new License();
+        }
+
+        var licenseClaims = ValidateKey(key!);
+        if (_validationUnsupported)
+        {
+            return new License { IsValidationUnsupported = true };
+        }
+
+        return licenseClaims.Any()
+            ? new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)))
+            : new License();
+    }
+
     /// <summary>
     /// Resolves the license key using the first non-blank value, in order of precedence: the
-    /// explicitly configured keys (the <see cref="MediatRServiceConfiguration.LicenseKey"/> then the
-    /// static <see cref="Mediator.LicenseKey"/>), the product-specific <c>MEDIATR_LICENSE_KEY</c>
+    /// explicitly configured keys (the <see cref="MediatRServiceConfiguration.LicenseKeyFactory"/> result,
+    /// the <see cref="MediatRServiceConfiguration.LicenseKey"/>, then the static
+    /// <see cref="Mediator.LicenseKey"/>), the product-specific <c>MEDIATR_LICENSE_KEY</c>
     /// environment variable, then the shared <c>LUCKYPENNY_LICENSE_KEY</c> environment variable
     /// (usable across Lucky Penny products). Whitespace is removed from each value, and empty values
     /// are treated as unset.

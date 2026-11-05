@@ -788,7 +788,7 @@ public static class ServiceRegistrar
                     "Call services.AddLogging() before services.AddMediatR().");
             var config = sp.GetService<MediatRServiceConfiguration>();
             return config != null
-                ? new LicenseAccessor(config, loggerFactory)
+                ? new LicenseAccessor(config, sp, loggerFactory)
                 : new LicenseAccessor(loggerFactory);
         });
         services.TryAddSingleton<LicenseValidator>(static sp =>
