@@ -140,6 +140,27 @@ namespace MediatR.Tests
         }
 
         [Fact]
+        public void ShouldEnforceRegistrationsLimitWhenTypeParametersLimitIsDisabled()
+        {
+            IServiceCollection services = new ServiceCollection();
+            services.AddFakeLogging();
+
+            var assembly = GenerateCombinationsTestAssembly(3, 2, 2);
+
+            Should.Throw<ArgumentException>(() =>
+            {
+                services.AddMediatR(cfg =>
+                {
+                    cfg.RegisterServicesFromAssembly(assembly);
+                    cfg.RegisterGenericHandlers = true;
+                    cfg.MaxGenericTypeParameters = 0;
+                    cfg.MaxGenericTypeRegistrations = 1;
+                });
+            })
+            .Message.ShouldContain("The total number of generic type registrations exceeds the maximum allowed");
+        }
+
+        [Fact]
         public void ShouldRegisterGenericHandlersWhenRegistrationTimeoutIsDisabled()
         {
             IServiceCollection services = new ServiceCollection();
