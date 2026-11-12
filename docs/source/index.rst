@@ -37,6 +37,7 @@ New to MediatR? Check out the :doc:`Setup` page first.
    :maxdepth: 1
    :caption: Migration guides
 
+   Migration-Guide-14.x-to-15.0
    Migration-Guide-12.0-to-12.1
    Migration-Guide-11.x-to-12.0
    Migration-Guide-10.x-to-11.0

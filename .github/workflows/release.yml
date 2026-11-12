@@ -25,6 +25,30 @@ jobs:
       with:
         fetch-depth: 0
         filter: tree:0
+    - name: Verify tag is on its release branch
+      # A tag created from the GitHub Releases UI can land on the default branch instead of the selected one (AutoMapper#4620)
+      run: |
+        set -euo pipefail
+        major="${GITHUB_REF_NAME#v}"
+        major="${major%%.*}"
+        status=0
+        git ls-remote --exit-code --heads origin "release/${major}.x" > /dev/null || status=$?
+        # Exit code 2 means no matching branch; anything else is a failed lookup
+        if [ "$status" -eq 0 ]; then
+          branch="release/${major}.x"
+        elif [ "$status" -eq 2 ]; then
+          branch="main"
+        else
+          echo "::error::Could not look up release/${major}.x (git ls-remote exit code ${status})"
+          exit 1
+        fi
+        git fetch --no-tags origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"
+        if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/${branch}"; then
+          echo "::error::Tag ${GITHUB_REF_NAME} (${GITHUB_SHA}) is not on ${branch}. Delete the tag and recreate it on ${branch}."
+          exit 1
+        fi
+        echo "Tag ${GITHUB_REF_NAME} is on ${branch}"
+      shell: bash
     - name: Azure Login via OIDC
       uses: azure/login@v2
       with:
@@ -34,10 +58,11 @@ jobs:
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
+        # 8.0.x: Runtime for NuGetKeyVaultSignTool and sbom-tool. Rolling sbom-tool forward produced incomplete SBOMs in AutoMapper#4681
         dotnet-version: |
           8.0.x
-          9.0.x
           10.0.x
+          11.0.x
     - name: Install NuGetKeyVaultSignTool
       run: dotnet tool install --global NuGetKeyVaultSignTool
     - name: Build and Test
@@ -79,10 +104,17 @@ jobs:
         NUGET_API_KEY: ${{ secrets.FEEDZIO_ACCESS_TOKEN }}
       run: ./Push.ps1
       shell: pwsh
+    - name: NuGet login
+      # Exchanges the workflow's OIDC token for a temporary API key, valid for one hour.
+      # Requires a trusted publishing policy on nuget.org for this repository and release.yml.
+      uses: NuGet/login@v1
+      id: nuget-login
+      with:
+        user: ${{ secrets.NUGET_USER }}
     - name: Push to NuGet
       env:
         NUGET_URL: https://api.nuget.org/v3/index.json
-        NUGET_API_KEY: ${{ secrets.MEDIATR_NUGET_API_KEY }}
+        NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
       run: ./Push.ps1
       shell: pwsh
     - name: Attach assets to GitHub Release
