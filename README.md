@@ -5,6 +5,7 @@ MediatR
 [![NuGet](https://img.shields.io/nuget/dt/mediatr.svg)](https://www.nuget.org/packages/mediatr) 
 [![NuGet](https://img.shields.io/nuget/vpre/mediatr.svg)](https://www.nuget.org/packages/mediatr)
 [![MyGet (dev)](https://img.shields.io/myget/mediatr-ci/v/MediatR.svg)](https://myget.org/gallery/mediatr-ci)
+[![Documentation Status](https://readthedocs.org/projects/mediatrio/badge/?version=latest)](https://docs.mediatr.io/en/latest/)
 
 Simple mediator implementation in .NET
 
@@ -12,7 +13,7 @@ In-process messaging with no dependencies.
 
 Supports request/response, commands, queries, notifications and events, synchronous and async with intelligent dispatching via C# generic variance.
 
-Examples in the [wiki](https://github.com/LuckyPennySoftware/MediatR/wiki).
+Examples in the [documentation](https://docs.mediatr.io/en/latest/).
 
 ### Installing MediatR
 
