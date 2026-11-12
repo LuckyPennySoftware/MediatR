@@ -28,7 +28,8 @@ public static class ServiceRegistrar
 
     public static void AddMediatRClassesWithTimeout(IServiceCollection services, MediatRServiceConfiguration configuration)
     {
-        using(var cts = new CancellationTokenSource(RegistrationTimeout))
+        // A timeout of 0 or less disables it. CancellationTokenSource would otherwise cancel immediately for 0
+        using(var cts = new CancellationTokenSource(RegistrationTimeout > 0 ? RegistrationTimeout : Timeout.Infinite))
         {
             try
             {
@@ -270,7 +271,7 @@ public static class ServiceRegistrar
             foreach (var list in lists)
             {
                 totalCombinations *= list.Count;
-                if (MaxGenericTypeParameters > 0 && totalCombinations > MaxGenericTypeRegistrations)
+                if (MaxGenericTypeRegistrations > 0 && totalCombinations > MaxGenericTypeRegistrations)
                     throw new ArgumentException($"Error registering the generic type: {requestType.FullName}. The total number of generic type registrations exceeds the maximum allowed ({MaxGenericTypeRegistrations}).");
             }
         }

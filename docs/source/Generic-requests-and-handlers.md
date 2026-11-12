@@ -9,8 +9,10 @@ These options on the `AddMediatR` configuration control generic handler registra
 | `RegisterGenericHandlers` | `false` | Whether MediatR registers handlers that have generic type parameters. |
 | `MaxGenericTypeParameters` | `10` | The maximum number of type parameters a generic request handler can have. Set to `0` to remove the limit. |
 | `MaxTypesClosing` | `100` | The maximum number of types that can close a generic request type parameter. Set to `0` to remove the limit. |
-| `MaxGenericTypeRegistrations` | `125000` | The maximum number of generic handler registrations MediatR will create. Setting this to `0` doesn't remove the limit; set a larger value instead. |
-| `RegistrationTimeout` | `15000` | The time in milliseconds before registration fails with a `TimeoutException`. Set to `-1` for no timeout. `0` times out immediately. |
+| `MaxGenericTypeRegistrations` | `125000` | The maximum number of generic handler registrations MediatR will create. Set to `0` to remove the limit. |
+| `RegistrationTimeout` | `15000` | The time in milliseconds before registration fails with a `TimeoutException`. Set to `0` for no timeout. |
+
+In MediatR 14.3 and earlier, setting `MaxGenericTypeRegistrations` or `RegistrationTimeout` to `0` makes registration fail instead of removing the limit. On those versions, use a larger `MaxGenericTypeRegistrations` value, and `-1` for no `RegistrationTimeout`.
 
 ## Implementation
 
