@@ -19,7 +19,9 @@ myst_heading_anchors = 3
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
-    'logo_only': True
+    'logo_only': True,
+    # The theme's default blue header washes out the blue logo, so match the dark sidebar instead
+    'style_nav_header_background': '#343131'
 }
 html_logo = 'img/logo.png'
 

@@ -5,6 +5,7 @@ on:
   push:
     branches:
     - main
+    - release/**
   pull_request:
 env:
   DOTNET_NOLOGO: true
@@ -30,10 +31,11 @@ jobs:
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
+        # 8.0.x: Runtime for NuGetKeyVaultSignTool and sbom-tool, matching release.yml
         dotnet-version: |
           8.0.x
-          9.0.x
           10.0.x
+          11.0.x
     - name: Install NuGetKeyVaultSignTool
       run: dotnet tool install --global NuGetKeyVaultSignTool
     - name: Build and Test
