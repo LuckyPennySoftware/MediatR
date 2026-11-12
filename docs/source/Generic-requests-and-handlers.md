@@ -2,38 +2,22 @@
 
 ## Configuration
 
-```csharp
- /// <summary>
- /// Configure the maximum number of type parameters that a generic request handler can have. To Disable this constraint, set the value to 0.
- /// </summary>
- public int MaxGenericTypeParameters { get; set; } = 10;
+These options on the `AddMediatR` configuration control generic handler registration:
 
- /// <summary>
- /// Configure the maximum number of types that can close a generic request type parameter constraint.  To Disable this constraint, set the value to 0.
- /// </summary>
- public int MaxTypesClosing { get; set; } = 100;
+| Option | Default | Description |
+| --- | --- | --- |
+| `RegisterGenericHandlers` | `false` | Whether MediatR registers handlers that have generic type parameters. |
+| `MaxGenericTypeParameters` | `10` | The maximum number of type parameters a generic request handler can have. Set to `0` to remove the limit. |
+| `MaxTypesClosing` | `100` | The maximum number of types that can close a generic request type parameter. Set to `0` to remove the limit. |
+| `MaxGenericTypeRegistrations` | `125000` | The maximum number of generic handler registrations MediatR will create. Setting this to `0` doesn't remove the limit; set a larger value instead. |
+| `RegistrationTimeout` | `15000` | The time in milliseconds before registration fails with a `TimeoutException`. Set to `-1` for no timeout. `0` times out immediately. |
 
- /// <summary>
- /// Configure the Maximum Amount of Generic RequestHandler Types MediatR will try to register.  To Disable this constraint, set the value to 0.
- /// </summary>
- public int MaxGenericTypeRegistrations { get; set; } = 125000;
-
- /// <summary>
- /// Configure the Timeout in Milliseconds that the GenericHandler Registration Process will exit with error.  To Disable this constraint, set the value to 0.
- /// </summary>
- public int RegistrationTimeout { get; set; } = 15000;
-
- /// <summary>
- /// Flag that controlls whether MediatR will attempt to register handlers that containg generic type parameters.
- /// </summary>
- public bool RegisterGenericHandlers { get; set; } = false;
-```
 ## Implementation
 
 Requests can be made generic such that work done to or for specific type arguments can be written once towards an abstraction.
 
 ```csharp
-//you can also configure other values shown above here as well
+//you can also configure the other options shown above here as well
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterGenericHandlers = true;
@@ -72,4 +56,4 @@ Console.WriteLine(pong.Message); //would output "Ping Pong"
 ```
 ### Notes
 * All assemblies from which your generic handlers, requests, or type parameters must be added to be registered.
-* To use primitives as generic types in requests and handlers you will need to include the assembly in which they are defined I.E. `typeof(int).Assembly`.
+* Only non-abstract classes are used to close generic type parameters. Value types such as `int` are never used, even if their assembly is registered, so register handlers closed over value types yourself.

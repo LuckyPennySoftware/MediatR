@@ -21,6 +21,8 @@ services.AddMediatR(cfg => {
 });
 ```
 
+MediatR requires an `ILoggerFactory` in the container, and resolving `IMediator` throws without one. Apps built on the .NET Generic Host or ASP.NET Core already register it. Otherwise, add the `Microsoft.Extensions.Logging` package and call `services.AddLogging()`.
+
 This method registers the known MediatR types:
 
 - `IMediator` as transient

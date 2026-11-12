@@ -5,7 +5,7 @@ MediatR
 [![NuGet](https://img.shields.io/nuget/dt/mediatr.svg)](https://www.nuget.org/packages/mediatr) 
 [![NuGet](https://img.shields.io/nuget/vpre/mediatr.svg)](https://www.nuget.org/packages/mediatr)
 [![MyGet (dev)](https://img.shields.io/myget/mediatr-ci/v/MediatR.svg)](https://myget.org/gallery/mediatr-ci)
-[![Documentation Status](https://readthedocs.org/projects/mediatr/badge/?version=latest)](https://docs.mediatr.io/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/mediatrio/badge/?version=latest)](https://docs.mediatr.io/en/latest/)
 
 Simple mediator implementation in .NET
 

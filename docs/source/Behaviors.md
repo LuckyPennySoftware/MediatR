@@ -35,7 +35,7 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
 Because the `next` delegate does not accept the `TRequest` as a parameter, you can mutate the incoming request but cannot replace it.
 
 ## Compatibility of pipeline behaviors
-The pipeline behaviors are only compatible with `IRequestHandler<TRequest,TResponse>` and can't be used with `INotificationHandler<TRequest>`.
+Pipeline behaviors wrap request handlers: both `IRequestHandler<TRequest,TResponse>` and `IRequestHandler<TRequest>`, where `TResponse` is `Unit`. They can't be used with `INotificationHandler<TNotification>`.
 
 ## Registering pipeline behaviors
 
@@ -43,6 +43,7 @@ MediatR supports registering pipeline behaviors through `AddMediatR` for closed 
 
 ```csharp
 services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssemblyContaining<Ping>();
     cfg.AddBehavior<IPipelineBehavior<Ping, Pong>, PingPongBehavior>();
     cfg.AddOpenBehavior(typeof(OuterBehavior<,>));
     cfg.AddOpenBehavior(typeof(InnerBehavior<,>));

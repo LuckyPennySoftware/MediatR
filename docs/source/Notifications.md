@@ -46,15 +46,25 @@ public interface INotificationPublisher
 }
 ```
 
-Custom publish strategies are injected into the `Mediator` class, and are registered with `AddMediatR`:
+Custom publish strategies are injected into the `Mediator` class, and are registered with `AddMediatR`. Either supply an instance, which is registered as a singleton:
 
 ```csharp
 services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssemblyContaining<Program>();
-    cfg.NotificationPublisher = new MyCustomPublisher(); // this will be singleton
-    cfg.NotificationPublisherType = typeof(MyCustomPublisher); // this will be the ServiceLifetime
+    cfg.NotificationPublisher = new MyCustomPublisher();
 });
 ```
+
+Or supply a type, which is registered with the configured `Lifetime` (transient by default):
+
+```csharp
+services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssemblyContaining<Program>();
+    cfg.NotificationPublisherType = typeof(MyCustomPublisher);
+});
+```
+
+If both are set, `NotificationPublisherType` is used.
 
 There are two built-in notification publishers:
 
